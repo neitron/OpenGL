@@ -71,7 +71,7 @@ static void RenderSceneCB()
 
   // Отрисовка
   //glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT,0);
-  glDrawElements(GL_QUADS, 24, GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, 0);
 
 
   // Отключаем атрибуты
