@@ -2,22 +2,33 @@
 #define TEXTURE_H
 
 #pragma once
-#include <GL\glut.h>
+
 #include <string>
-#include <ImageMagick\Magick++.h>
+
+#include <GL\glew.h>
+#include <Magick++.h>
+
+enum : GLenum 
+{
+  q,w
+};
 
 class Texture
 {
 public:
   
-    Texture(GLenum TextureTarget, const std::string& FileName)
-    {
-      Magick::Image* i = 0;
-    }
+  Texture(GLenum textureTarget, const std::string& fileName);
+
+  bool Load();
+
+  void Bind(GLenum textureUnit);
     
-    //bool Load();
- 
-    //void Bind(GLenum TextureUnit);
+private:
+  std::string m_fileName;
+  GLenum m_textureTarget;
+  GLuint m_textureObject;
+  Magick::Image *m_pImage;
+  Magick::Blob m_blob;
 };
 
 #endif /*TEXTURE*/

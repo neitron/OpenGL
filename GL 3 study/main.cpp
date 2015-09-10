@@ -71,7 +71,7 @@ static void RenderSceneCB()
 
   // Отрисовка
   //glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT,0);
-  glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_QUADS, 24, GL_UNSIGNED_INT, 0);
 
 
   // Отключаем атрибуты
@@ -310,7 +310,7 @@ int main(int argc, char** argv)
   glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
   //glutInitWindowPosition(100, 100);
   //glutCreateWindow("Sample Project");
-  glutGameModeString("1366x768:32");
+  glutGameModeString("1366x768:32@72");
   glutEnterGameMode();
   glutSetWindowTitle("Sample project");
   // Инициадизация цикловых функций GLUTа
@@ -328,6 +328,10 @@ int main(int argc, char** argv)
 
   // GL_COLOR_BUFFER_BIT теперь следующего цвета
   glClearColor(0.1f, 0.1f, 0.1f, 0.1f);
+  glFrontFace(GL_CW);
+  glCullFace(GL_BACK);
+  glEnable(GL_CULL_FACE);
+
 
   // Создаем буфер вершин
   CreateVertexBuffer();
