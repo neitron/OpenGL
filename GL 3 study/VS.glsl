@@ -6,7 +6,7 @@ layout (location = 1) in vec2 TexCoord;
 uniform mat4 gWVP;                               
 
 out vec2 TexCoord0;
-                                                
+                               
 void main(void)
 {
    gl_Position = gWVP * vec4(Position, 1.0);

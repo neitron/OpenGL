@@ -35,7 +35,6 @@ GLuint gSampler;
 Camera *pGameCamera = 0;
 Texture *pTexture = 0;
 
-
 // -------------------------------------------------------------------------------------------------------
 static void RenderSceneCB()
 {
@@ -48,62 +47,52 @@ static void RenderSceneCB()
 
   Pipeline p;
   p.Rotate(0.0f, Scale, 0.0f);
-  p.WorldPos(0.0f, 0.0f, 4.0f);
+  p.WorldPos(0.0f, 0.0f, 3.0f);
   p.SetCamera(pGameCamera->GetPos(), pGameCamera->GetTarget(), pGameCamera->GetUp());
   p.SetPerspectiveProj(60.0f, WINDOW_WIDTH, WINDOW_HEIGHT, 1.0f, 100.0f);
-
-  glUniformMatrix4fv(gWVPLocation, 1, GL_TRUE, (const GLfloat*)p.GetTrans());
-
+  
+  // Передаем значение в шейдер по индексу
   // Вот еще один пример функции glUniform* для 
   // загрузки данных в uniform-переменные шейдера
   // 1: индекс unifor variable
   // 2: количество обновляемых матриц
   // 3: по строкам или по столбцам
   // 4: указатель на первй элемент
-  //glUniformMatrix4fv(gWorldLocation, 1, GL_TRUE, (const GLfloat*)p.GetTrans());
+  glUniformMatrix4fv(gWVPLocation, 1, GL_TRUE, (const GLfloat*)p.GetTrans());
 
   // Передаем значение в шейдер по индексу
   //glUniform1f(gScaleLocation, sinf(Scale));
 
-  // Подключаем атрибут
+  // Подключаем атрибут (так же как и в вершинном шейдере)
   // 1: номер атрибута
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
   
+  // Активный буфер
   glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
   
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)12);
-  
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO[0]);
-  pTexture->Bind(GL_TEXTURE0);
-  glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
-
-  glDisableVertexAttribArray(0);
-  glDisableVertexAttribArray(1);
-
-
-  // Активный буфер
-  //glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
-  //
-  // Как конвейеру воспринимать данные буфера
-  // 1: номер атрибута
+  // Как конвейеру воспринимать данные буфера (каждый атрибут в отдельности)
+  // 1: номер атрибута (атрибут позиции, цвета или текстуры)
   // 2: количество компонент в атрибуте (x y z) = 3
   // 3: тип каждого компонента (x: float)
   // 4: нормализировать атрибуты или нет
-  // 5: число байтов между 2 атрибутами (у нас 1 атрибут)
-  // 6: смещение в структуре (если она есть)
-  //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-  //
-  //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO[1]);
-  //
-  // Отрисовка
-  //glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT,0);
-  //glDrawElements(GL_QUADS, 24, GL_UNSIGNED_INT, 0);
-  //
-  //
+  // 5: число байтов между 2 атрибутами (одного типа)
+  // 6: смещение в структуре (с какой позиции начинаются данные даного атрибута)
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)(sizeof(GLfloat) * 3));
+  
+  // Активный буфер
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO[0]);
+  
+  // Привязка текстуры к "модулю тектуры"
+  pTexture->Bind(GL_TEXTURE0);
+
+  // Рисуем что либо
+  glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
+
   // Отключаем атрибуты
-  //glDisableVertexAttribArray(0);
+  glDisableVertexAttribArray(0);
+  glDisableVertexAttribArray(1);
 
   glutSwapBuffers();
 }
@@ -368,8 +357,13 @@ int main(int argc, char** argv)
 
   // GL_COLOR_BUFFER_BIT теперь следующего цвета
   glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+  
+  // Не рендерить то, что мы не видим
+  // сообщаем, что вершины подаются по часовой стрелке
   glFrontFace(GL_CW);
+  // не рендерь обратную сторону 
   glCullFace(GL_BACK);
+  // не рендерь не видные нам плоскости
   glEnable(GL_CULL_FACE);
 
 

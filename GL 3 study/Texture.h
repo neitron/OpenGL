@@ -8,28 +8,28 @@
 #include <GL\glew.h>
 #include <SOIL.h>
 
-
+// Класс текстуры
 class Texture
 {
 public:
 
   Texture(GLenum textureTarget, const std::string &fileName);
-  ~Texture() 
-  { 
-    //SOIL_free_image_data(m_image); 
-    glBindTexture(m_textureTarget, 0);
-  } 
+  ~Texture();
+  
+  // Загрузка текстуры
   bool Load();
-
+  // Задает активный объект текстуры
   void Bind(GLenum textureUnit);
     
 private:
-  std::string m_fileName;
-  GLenum m_textureTarget;
-  GLuint m_textureObject;
-  unsigned char* m_image;
-  GLint m_Width;
-  GLint m_Height;/*
+
+  std::string m_fileName; // Имя файла текстуры
+  GLenum m_textureTarget; // Указатель на текстуру
+  GLuint m_textureObject; // Массив объектов текстур
+  unsigned char* m_image; // Загруженное изображение
+  GLint m_Width;    // Запомним ширину изображения
+  GLint m_Height;   // Высота
+  /*
   Magick::Image *m_pImage;
   Magick::Blob m_blob;*/
 };
