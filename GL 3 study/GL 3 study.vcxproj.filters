@@ -16,6 +16,9 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{7bc131be-5f7a-4757-931b-dd0362c1e190}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SOIL">
+      <UniqueIdentifier>{58fd9f17-7819-45d0-af2c-ffa489d6b853}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -71,6 +74,9 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="FS.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="temp.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

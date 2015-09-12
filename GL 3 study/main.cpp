@@ -8,18 +8,33 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
 
+
 #include "pipeline.h"
 #include "Camera.h"
+#include "Texture.h"
 
 #define WINDOW_WIDTH 1366
 #define WINDOW_HEIGHT 768
 
-Camera *pGameCamera = 0;
+struct Vertex
+{
+    Vector3f m_pos;
+    Vector2f m_tex;
 
-GLuint gWVPLocation;
+    Vertex() { }
+    Vertex(Vector3f pos, Vector2f tex) : 
+      m_pos(pos), 
+      m_tex(tex) { }
+};
+
 
 GLuint VBO[2]; // Глобальная переменная для хранения указателя на буфер вершин
 GLuint IBO[2];
+GLuint gWVPLocation;
+GLuint gSampler;
+Camera *pGameCamera = 0;
+Texture *pTexture = 0;
+
 
 // -------------------------------------------------------------------------------------------------------
 static void RenderSceneCB()
@@ -28,13 +43,12 @@ static void RenderSceneCB()
 
   glClear(GL_COLOR_BUFFER_BIT);
 
-
   static float Scale = 0.0f;
   Scale += 0.01;
 
   Pipeline p;
   p.Rotate(0.0f, Scale, 0.0f);
-  p.WorldPos(0.0f, 0.0f, 3.0f);
+  p.WorldPos(0.0f, 0.0f, 4.0f);
   p.SetCamera(pGameCamera->GetPos(), pGameCamera->GetTarget(), pGameCamera->GetUp());
   p.SetPerspectiveProj(60.0f, WINDOW_WIDTH, WINDOW_HEIGHT, 1.0f, 100.0f);
 
@@ -54,10 +68,24 @@ static void RenderSceneCB()
   // Подключаем атрибут
   // 1: номер атрибута
   glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(1);
+  
+  glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
+  
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)12);
+  
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO[0]);
+  pTexture->Bind(GL_TEXTURE0);
+  glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
+
+  glDisableVertexAttribArray(0);
+  glDisableVertexAttribArray(1);
+
 
   // Активный буфер
-  glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
-
+  //glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
+  //
   // Как конвейеру воспринимать данные буфера
   // 1: номер атрибута
   // 2: количество компонент в атрибуте (x y z) = 3
@@ -65,17 +93,17 @@ static void RenderSceneCB()
   // 4: нормализировать атрибуты или нет
   // 5: число байтов между 2 атрибутами (у нас 1 атрибут)
   // 6: смещение в структуре (если она есть)
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO[1]);
-
+  //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  //
+  //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO[1]);
+  //
   // Отрисовка
   //glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT,0);
-  glDrawElements(GL_QUADS, 24, GL_UNSIGNED_INT, 0);
-
-
+  //glDrawElements(GL_QUADS, 24, GL_UNSIGNED_INT, 0);
+  //
+  //
   // Отключаем атрибуты
-  glDisableVertexAttribArray(0);
+  //glDisableVertexAttribArray(0);
 
   glutSwapBuffers();
 }
@@ -121,11 +149,15 @@ static void InitializeGlutCallbacks()
 static void CreateVertexBuffer()
 {
   // 3 vertices
-  Vector3f Vertices[4];
+  Vertex Vertices[4] = {  Vertex(Vector3f(-1.0f, -1.0f, 0.5773f), Vector2f(0.0f, 0.0f)),
+                          Vertex(Vector3f(0.0f, -1.0f, -1.15475), Vector2f(0.5f, 0.0f)),
+                          Vertex(Vector3f(1.0f, -1.0f, 0.5773f),  Vector2f(1.0f, 0.0f)),
+                          Vertex(Vector3f(0.0f, 1.0f, 0.0f),      Vector2f(0.5f, 1.0f)) };
+  /*Vector3f Vertices[4];
   Vertices[0] = Vector3f(-1.0f, -1.0f, 0.5773f);
   Vertices[1] = Vector3f(0.0f, -1.0f, -1.15475f);
   Vertices[2] = Vector3f(1.0f, -1.0f, 0.5773f);
-  Vertices[3] = Vector3f(0.0f, 1.0f, 0.0f);
+  Vertices[3] = Vector3f(0.0f, 1.0f, 0.0f);*/
 
   Vector3f cubeV[8];
   cubeV[0] = Vector3f(-1.0f, 1.0f, 1.0f);
@@ -168,11 +200,15 @@ static void CreateIndexBuffer()
   };
 
   // indeces
-  unsigned int indeces[] = 
-  { 0, 3, 1,
+  unsigned int indeces[] =
+    { 0, 3, 1, 
     1, 3, 2,
     2, 3, 0,
-    0, 2, 1 };
+    1, 2, 0 };
+  /*{ 0, 3, 1, 
+    1, 3, 2,
+    2, 3, 0,
+    0, 2, 1 };*/
 
   glGenBuffers(2, IBO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO[1]);
@@ -300,6 +336,9 @@ static void CompileShaders()
   // Запрашиваем позицию (index for acces) uniform variable
   gWVPLocation = glGetUniformLocation(ShaderProgram, "gWVP");
   assert(gWVPLocation != 0xFFFFFFFF);
+
+  //gSampler = glGetUniformLocation(ShaderProgram, "gSampler");
+  //assert(gSampler != 0xFFFFFFFF);
 }
 
 // -------------------------------------------------------------------------------------------------------
@@ -313,6 +352,7 @@ int main(int argc, char** argv)
   glutGameModeString("1366x768:32@72");
   glutEnterGameMode();
   glutSetWindowTitle("Sample project");
+  
   // Инициадизация цикловых функций GLUTа
   InitializeGlutCallbacks();
 
@@ -327,7 +367,7 @@ int main(int argc, char** argv)
   }
 
   // GL_COLOR_BUFFER_BIT теперь следующего цвета
-  glClearColor(0.1f, 0.1f, 0.1f, 0.1f);
+  glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
   glFrontFace(GL_CW);
   glCullFace(GL_BACK);
   glEnable(GL_CULL_FACE);
@@ -340,6 +380,13 @@ int main(int argc, char** argv)
   // Определяем и компилируем шейдеры
   CompileShaders();
   
+  glUniform1i(gSampler, 0);
+
+  pTexture = new Texture(GL_TEXTURE_2D, "Content/test.png");
+
+  if(!pTexture->Load())
+    return 1;
+
   // GLUT цикл
   glutMainLoop();
 
