@@ -8,12 +8,11 @@ float Camera::STEP_SIZE_MOUSE(0.1f); // MOUSE motion cam step
 const int Camera::MARGIN(10); // auto rotate cam mardin screen
 
 Camera::Camera(int wWidth, int wHeight) : 
-    m_windowWidth(wWidth), 
-    m_windowHeight(wHeight),
-    m_pos(Vector3f(0.0f, 0.0f, 0.0f)),
+    m_pos(Vector3f(0.0f, 0.0f, 0.0f)), 
     m_target(Vector3f(0.0f, 0.0f, 1.0f)),
-    m_up(Vector3f(0.0f, 1.0f, 0.0f))
-
+    m_up(Vector3f(0.0f, 1.0f, 0.0f)),
+    m_windowWidth(wWidth),
+    m_windowHeight(wHeight)
   { 
     m_target.Normalize();
     Init();
@@ -78,8 +77,8 @@ void Camera::OnMouse(int x, int y)
     m_mousePos.x = x;
     m_mousePos.y = y;
  
-    m_AngleH += (float)DeltaX * STEP_SIZE_MOUSE;
-    m_AngleV += (float)DeltaY * STEP_SIZE_MOUSE;
+    m_AngleH += static_cast<float>(DeltaX) * STEP_SIZE_MOUSE;
+    m_AngleV += static_cast<float>(DeltaY) * STEP_SIZE_MOUSE;
  
     if (DeltaX == 0){
         if (x <= MARGIN){

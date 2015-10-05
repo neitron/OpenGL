@@ -32,8 +32,8 @@ GLuint VBO[2]; // Глобальная переменная для хранения указателя на буфер вершин
 GLuint IBO[2];
 GLuint gWVPLocation;
 GLuint gSampler;
-Camera *pGameCamera = 0;
-Texture *pTexture = 0;
+Camera *pGameCamera = nullptr;
+Texture *pTexture = nullptr;
 
 // -------------------------------------------------------------------------------------------------------
 static void RenderSceneCB()
@@ -58,7 +58,7 @@ static void RenderSceneCB()
   // 2: количество обновляемых матриц
   // 3: по строкам или по столбцам
   // 4: указатель на первй элемент
-  glUniformMatrix4fv(gWVPLocation, 1, GL_TRUE, (const GLfloat*)p.GetTrans());
+  glUniformMatrix4fv(gWVPLocation, 1, GL_TRUE, reinterpret_cast<const GLfloat*>(p.GetTrans()));
 
   // Передаем значение в шейдер по индексу
   //glUniform1f(gScaleLocation, sinf(Scale));
@@ -78,8 +78,8 @@ static void RenderSceneCB()
   // 4: нормализировать атрибуты или нет
   // 5: число байтов между 2 атрибутами (одного типа)
   // 6: смещение в структуре (с какой позиции начинаются данные даного атрибута)
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)(sizeof(GLfloat) * 3));
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<const GLvoid*>(sizeof(GLfloat) * 3));
   
   // Активный буфер
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO[0]);
@@ -240,7 +240,7 @@ static void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum Shad
   glGetShaderiv(ShaderObj, GL_COMPILE_STATUS, &success);
   if (!success) {
     GLchar InfoLog[1024];
-    glGetShaderInfoLog(ShaderObj, 1024, NULL, InfoLog);
+    glGetShaderInfoLog(ShaderObj, 1024, nullptr, InfoLog);
     fprintf(stderr, "Error compiling shader type %d: '%s'\n", ShaderType, InfoLog);
     system("pause");
     exit(1);
@@ -302,7 +302,7 @@ static void CompileShaders()
   // status of linker
   glGetProgramiv(ShaderProgram, GL_LINK_STATUS, &Success);
   if (Success == 0) {
-    glGetProgramInfoLog(ShaderProgram, sizeof(ErrorLog), NULL, ErrorLog);
+    glGetProgramInfoLog(ShaderProgram, sizeof(ErrorLog), nullptr, ErrorLog);
     fprintf(stderr, "Error linking shader program: '%s'\n", ErrorLog);
     system("pause");
     exit(1);
@@ -312,7 +312,7 @@ static void CompileShaders()
   glValidateProgram(ShaderProgram);
   glGetProgramiv(ShaderProgram, GL_VALIDATE_STATUS, &Success);
   if (!Success) {
-    glGetProgramInfoLog(ShaderProgram, sizeof(ErrorLog), NULL, ErrorLog);
+    glGetProgramInfoLog(ShaderProgram, sizeof(ErrorLog), nullptr, ErrorLog);
     fprintf(stderr, "Invalid shader program: '%s'\n", ErrorLog);
     system("pause");
     exit(1);
@@ -350,7 +350,7 @@ int main(int argc, char** argv)
   // Must be done after glut is initialized!
   GLenum res = glewInit();
   if (res != GLEW_OK) {
-    fprintf(stderr, "Error: '%s'\n", glewGetErrorString(res));
+    fprintf(stderr, "Error: '%p'\n", glewGetErrorString(res));
     system("pause");
     return 1;
   }
