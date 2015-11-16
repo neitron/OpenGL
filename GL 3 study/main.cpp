@@ -133,15 +133,15 @@ static void InitializeGlutCallbacks()
   glutKeyboardFunc(KeyboardCB);
 }
 
-// -------------------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------
 // Создание буфера вершин
 static void CreateVertexBuffer()
 {
   // 3 vertices
-  Vertex Vertices[4] = {  Vertex(Vector3f(-1.0f, -1.0f, 0.5773f), Vector2f(0.0f, 0.0f)),
+  Vertex Vertices[4] = {  Vertex(Vector3f(-1.0f, -1.0f, 0.5773f), Vector2f(0.0f, 1.0f)),
                           Vertex(Vector3f(0.0f, -1.0f, -1.15475), Vector2f(0.5f, 1.0f)),
-                          Vertex(Vector3f(1.0f, -1.0f, 0.5773f),  Vector2f(1.0f, 0.0f)),
-                          Vertex(Vector3f(0.0f, 1.0f, 0.0f),      Vector2f(0.5f, 0.3271484f)) };
+                          Vertex(Vector3f(1.0f, -1.0f, 0.5773f),  Vector2f(1.0f, 1.0f)),
+                          Vertex(Vector3f(0.0f, 1.0f, 0.0f),      Vector2f(0.5f, 0.0f)) };
   /*Vector3f Vertices[4];
   Vertices[0] = Vector3f(-1.0f, -1.0f, 0.5773f);
   Vertices[1] = Vector3f(0.0f, -1.0f, -1.15475f);
@@ -376,7 +376,7 @@ int main(int argc, char** argv)
   
   glUniform1i(gSampler, 0);
 
-  pTexture = new Texture(GL_TEXTURE_2D, "Content/test_rotate_02.png");
+  pTexture = new Texture(GL_TEXTURE_2D, "Content/test_01.png");
 
   if(!pTexture->Load())
     return 1;
