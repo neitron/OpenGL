@@ -30,10 +30,15 @@ struct Vertex
 
 GLuint VBO[2]; // Глобальная переменная для хранения указателя на буфер вершин
 GLuint IBO[2];
+
 GLuint gWVPLocation;
 GLuint gSampler;
+GLuint gWave;
+
 Camera *pGameCamera = nullptr;
 Texture *pTexture = nullptr;
+
+
 
 // -------------------------------------------------------------------------------------------------------
 static void RenderSceneCB()
@@ -58,7 +63,11 @@ static void RenderSceneCB()
   // 2: количество обновляемых матриц
   // 3: по строкам или по столбцам
   // 4: указатель на первй элемент
-  glUniformMatrix4fv(gWVPLocation, 1, GL_TRUE, reinterpret_cast<const GLfloat*>(p.GetTrans()));
+  glUniformMatrix4fv( gWVPLocation, 1, GL_TRUE, reinterpret_cast<const GLfloat*>(p.GetTrans()) );
+  
+  static float wave = 0.0f;
+  wave += 0.0003f;
+  glUniform1f(gWave, GLfloat( wave ) );
 
   // Передаем значение в шейдер по индексу
   //glUniform1f(gScaleLocation, sinf(Scale));
@@ -86,7 +95,7 @@ static void RenderSceneCB()
   
   // Привязка текстуры к "модулю тектуры"
   pTexture->Bind(GL_TEXTURE0);
-
+  
   // Рисуем что либо
   glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
 
@@ -325,6 +334,9 @@ static void CompileShaders()
   // Запрашиваем позицию (index for acces) uniform variable
   gWVPLocation = glGetUniformLocation(ShaderProgram, "gWVP");
   assert(gWVPLocation != 0xFFFFFFFF);
+
+  gWave = glGetUniformLocation(ShaderProgram, "gWave");
+  assert(gWave != 0xFFFFFFFF);
 
   //gSampler = glGetUniformLocation(ShaderProgram, "gSampler");
   //assert(gSampler != 0xFFFFFFFF);
