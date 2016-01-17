@@ -3,9 +3,8 @@
 
 #pragma once
 
-#include <GL\glut.h>
 #include "math3d.h"
-#include "Application.h"
+
 
 class Camera
 {
@@ -24,12 +23,14 @@ public:
   void Camera::Update();
   bool OnKeyboard(int Key);
 
-  const Vector3f& GetPos() const;
+  const Vector3f& GetPos()    const;
   const Vector3f& GetTarget() const;
-  const Vector3f& GetUp() const;
+  const Vector3f& GetUp()     const;
  
-  static float STEP_SIZE_MOUSE; // MOUSE motion cam step
+  
+
 private:
+
   Vector3f m_pos;
   Vector3f m_target;
   Vector3f m_up;
@@ -47,11 +48,11 @@ private:
   bool m_OnLeftEdge;
   bool m_OnRightEdge;
 
-  static const float STEP_SIZE; // arrows motion cam step
+  static float STEP_SIZE_MOUSE; // MOUSE motion cam step
+
+  static const float STEP_SIZE;       // arrows motion cam step
   
   static const int MARGIN;  // auto rotate cam mardin screen
-
-
 };
 
 #endif /*CAMERA_H*/

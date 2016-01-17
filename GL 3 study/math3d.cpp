@@ -1,3 +1,7 @@
+#pragma once
+
+#include <math.h>
+
 #include "math3d.h"
 
 Vector3f::Vector3f(const Vector3f &v)

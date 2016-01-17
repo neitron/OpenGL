@@ -1,38 +1,41 @@
 #ifndef MATH_3D_H
 #define	MATH_3D_H
 
-#pragma once
-#include <stdio.h>
-#include <math.h>
+const float M_PI = 3.141592653f; // 3.141592653 58979323846
 
-const float M_PI = 3.141592653f/*58979323846*/;
-
-//#define ToRadian(x) ((x) * M_PI / 180.0f)
-//#define ToDegree(x) ((x) * 180.0f / M_PI)
 
 // Угол (алгебраический)
 class Angle
 {
 public:
+  
   // Радианы в градусы
-  inline static float ToDegree(float x){
+  inline static float ToDegree(float x)
+  {
     return (x * 180.0f / M_PI);
   };
+  
   // Градусы в радианы
-  inline static float ToRadian(float x){
+  inline static float ToRadian(float x)
+  {
     return (x * M_PI / 180.0f);
   };
 
 private:
+  
   Angle() { };
   ~Angle() { };
 };
+
+
 
 struct Vector2i
 {
   int x;
   int y;
 };
+
+
 
 struct Vector2f
 {
@@ -44,6 +47,8 @@ struct Vector2f
     x(_x), 
     y(_y) { }
 };
+
+
 
 // Вектор 3D :float
 struct Vector3f
@@ -68,12 +73,7 @@ struct Vector3f
   Vector3f& operator -= (const Vector3f &v);
   Vector3f& operator *= (const float f);
   
-  void Rotate(float angle, const Vector3f& axis);
-  
-  inline void Print() const
-    {
-      printf("(%.02f, %.02f, %.02f", x, y, z);
-    }
+  void Rotate ( float angle, const Vector3f& axis );
 };
 
 // Матрица 4х4 :float

@@ -1,36 +1,42 @@
 #pragma once
+
+#include <math.h>
+
+#include <GL\glut.h>
+
 #include "Camera.h"
 
 
-const float Camera::STEP_SIZE(0.01f); // arrows motion cam step
-float Camera::STEP_SIZE_MOUSE(0.1f); // MOUSE motion cam step
+const float Camera::STEP_SIZE(0.1f);  // arrows motion cam step
 
-const int Camera::MARGIN(10); // auto rotate cam mardin screen
+const int Camera::MARGIN ( 10 ); // auto rotate cam mardin screen
 
-Camera::Camera(int wWidth, int wHeight) : 
-    m_pos(Vector3f(0.0f, 0.0f, 0.0f)), 
-    m_target(Vector3f(0.0f, 0.0f, 1.0f)),
-    m_up(Vector3f(0.0f, 1.0f, 0.0f)),
-    m_windowWidth(wWidth),
-    m_windowHeight(wHeight)
-  { 
-    m_target.Normalize();
-    Init();
-  };
+float Camera::STEP_SIZE_MOUSE(0.1f);  // MOUSE motion cam step
 
-Camera::Camera(int WindowWidth, int WindowHeight, const Vector3f& Pos, const Vector3f& Target, const Vector3f& Up)
+
+Camera::Camera ( int wWidth, int wHeight ) : 
+  m_pos     ( Vector3f( 0.0f, 0.0f, 0.0f ) ), 
+  m_target  ( Vector3f( 0.0f, 0.0f, 1.0f ) ),
+  m_up      ( Vector3f( 0.0f, 1.0f, 0.0f ) ),
+  m_windowWidth   ( wWidth ),
+  m_windowHeight  ( wHeight )
+{ 
+  m_target.Normalize();
+
+  Init();
+};
+
+Camera::Camera ( int wWidth, int wHeight, const Vector3f& pos, const Vector3f& target, const Vector3f& up ) :
+  m_pos           ( pos ),
+  m_target        ( target ),
+  m_up            ( up ),
+  m_windowWidth   ( wWidth ),
+  m_windowHeight  ( wHeight )
 {
-    m_windowWidth  = WindowWidth;
-    m_windowHeight = WindowHeight;
-    m_pos = Pos;
- 
-    m_target = Target;
-    m_target.Normalize();
- 
-    m_up = Up;
-    m_up.Normalize();
- 
-    Init();
+  m_target.Normalize ( );
+  m_up.Normalize ( );
+
+  Init ( );
 }
 
 void Camera::Init()
@@ -164,43 +170,61 @@ void Camera::Update()
 
 bool Camera :: OnKeyboard (int Key)
 {
-  bool Ret = false;
-    switch (Key) {
-        case GLUT_KEY_UP:{
-            m_pos += (m_target * STEP_SIZE);
-            Ret = true;
-            }
-                         break;
-        case GLUT_KEY_DOWN:{
-            m_pos -= (m_target * STEP_SIZE);
-            Ret = true;
-            } 
-                           break;
-        case GLUT_KEY_LEFT:{
-            Vector3f Left = m_target.Cross(m_up);
-            Left.Normalize();
-            Left *= STEP_SIZE;
-            m_pos += Left;
-            Ret = true;
-            } 
-                           break;
-        case GLUT_KEY_RIGHT:{
-            Vector3f Right = m_up.Cross(m_target);
-            Right.Normalize();
-            Right *= STEP_SIZE;
-            m_pos += Right;
-            Ret = true;
-            } 
-                            break;
-        case GLUT_KEY_END:{
-          m_pos = Vector3f(0.0f, 0.0f, 0.0f);
-          m_target = Vector3f(0.0f, 0.0f, 1.0f);
-          m_target.Normalize();
-          m_up = Vector3f(0.0f, 1.0f, 0.0f);
-          Init();
-                } break;
+  bool isKeyPresed = false;
+
+  switch ( Key )
+  {
+    case GLUT_KEY_UP:
+    {
+      m_pos += ( m_target * STEP_SIZE );
+      isKeyPresed = true;
+    } 
+    break;
+
+    case GLUT_KEY_DOWN:
+    {
+      m_pos -= ( m_target * STEP_SIZE );
+      isKeyPresed = true;
+    } 
+    break;
+
+    case GLUT_KEY_LEFT:
+    {
+      Vector3f Left = m_target.Cross ( m_up );
+      Left.Normalize ( );
+      Left *= STEP_SIZE;
+      m_pos += Left;
+      isKeyPresed = true;
+    } 
+    break;
+  
+    case GLUT_KEY_RIGHT:
+    {
+      Vector3f Right = m_up.Cross ( m_target );
+      Right.Normalize ( );
+      Right *= STEP_SIZE;
+      m_pos += Right;
+      isKeyPresed = true;
+    } 
+    break;
+  
+    case GLUT_KEY_END:
+    {
+      m_pos = Vector3f ( 0.0f, 0.0f, 0.0f );
+      m_target = Vector3f ( 0.0f, 0.0f, 1.0f );
+      m_target.Normalize ( );
+      m_up = Vector3f ( 0.0f, 1.0f, 0.0f );
+      Init ( );
+    } 
+    break;
+
+    default:
+    {
+      
     }
-    return Ret;
+  }
+
+  return isKeyPresed;
 }
 
 const Vector3f& Camera::GetPos() const

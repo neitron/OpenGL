@@ -6,6 +6,7 @@
 class Pipeline
 {
 public:
+
     Pipeline()
     {
         m_scale      = Vector3f(1.0f, 1.0f, 1.0f);
@@ -43,21 +44,24 @@ public:
         m_persProj.zFar   = zFar;
     }
 
-    void SetCamera(const Vector3f& Pos, const Vector3f& Target, const Vector3f& Up)
+    void SetCamera ( const Vector3f& Pos, const Vector3f& Target, const Vector3f& Up )
     {
-        m_camera.Pos = Pos;
+        m_camera.Pos    = Pos;
         m_camera.Target = Target;
-        m_camera.Up = Up;
+        m_camera.Up     = Up;
     }
 
+    // Итоговая матрица трансформации
     const Matrix4f* GetTrans();
 
 private:
+
     Vector3f m_scale;
     Vector3f m_worldPos;
     Vector3f m_rotateInfo;
 
-    struct {
+    struct 
+    {
         float FOV;
         float Width;
         float Height;
@@ -65,7 +69,8 @@ private:
         float zFar;
     } m_persProj;
 
-    struct {
+    struct 
+    {
         Vector3f Pos;
         Vector3f Target;
         Vector3f Up;
