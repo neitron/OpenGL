@@ -1,7 +1,7 @@
 #include "pipeline.h"
 
 // Итоговая матрица трансформации
-const Matrix4f* Pipeline::GetTrans()
+const Matrix4f& Pipeline::GetWVPTrans()
 {
   // Матрица маштабирования
   Matrix4f ScaleTrans;
@@ -30,5 +30,17 @@ const Matrix4f* Pipeline::GetTrans()
   // Перемножаем для получения единой матрици трансформации
   m_transformation = PersProjTrans * CameraRotateTrans * CameraTranslationTrans * TranslationTrans * RotateTrans * ScaleTrans;
   
-  return &m_transformation;
+  return m_transformation;
+}
+
+const Matrix4f& Pipeline::GetWorldTrans ( )
+{
+  Matrix4f ScaleTrans, RotateTrans, TranslationTrans;
+
+  ScaleTrans.InitScaleTransform ( m_scale.x, m_scale.y, m_scale.z );
+  RotateTrans.InitRotateTransform ( m_rotateInfo.x, m_rotateInfo.y, m_rotateInfo.z );
+  TranslationTrans.InitTranslationTransform ( m_worldPos.x, m_worldPos.y, m_worldPos.z );
+
+  m_WorldTransformation = TranslationTrans * RotateTrans * ScaleTrans;
+  return m_WorldTransformation;
 }

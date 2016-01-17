@@ -73,6 +73,24 @@ struct Vector3f
   Vector3f& operator -= (const Vector3f &v);
   Vector3f& operator *= (const float f);
   
+  friend inline Vector3f operator+( const Vector3f& l, const Vector3f& r )
+  {
+    Vector3f Ret ( l.x + r.x,
+      l.y + r.y,
+      l.z + r.z );
+
+    return Ret;
+  }
+
+  friend inline Vector3f operator-( const Vector3f& l, const Vector3f& r )
+  {
+    Vector3f Ret ( l.x - r.x,
+      l.y - r.y,
+      l.z - r.z );
+
+    return Ret;
+  }
+
   void Rotate ( float angle, const Vector3f& axis );
 };
 

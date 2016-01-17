@@ -6,10 +6,6 @@
 #include "lighting_technique.h"
 
 
-//static const char* pVS = "";
-//static const char* pFS = "";
-
-
 LightingTechnique::LightingTechnique ( )
 { }
 
@@ -24,7 +20,7 @@ bool LightingTechnique::SetShader ( const char* pFilename, char* &pShaderText )
     return false;
   }
 
-  long size = is.tellg ( );
+  long size = (long) is.tellg ( );
   pShaderText = new char[size + 1];
 
   is.seekg ( 0, std::ios::beg );
@@ -67,15 +63,23 @@ bool LightingTechnique::Init ( )
     return false;
   }
 
-  m_WVPLocation = GetUniformLocation ( "gWVP" );
-  m_samplerLocation = GetUniformLocation ( "gSampler" );
-  m_dirLightColorLocation = GetUniformLocation ( "gDirectionalLight.color" );
-  m_dirLightAmbientIntensityLocation = GetUniformLocation ( "gDirectionalLight.ambientIntensity" );
+  m_WVPLocation         = GetUniformLocation ( "gWVP" );
+  m_samplerLocation     = GetUniformLocation ( "gSampler" );
+  m_WorldMatrixLocation = GetUniformLocation ( "gWorld" );
 
-  if ( m_dirLightAmbientIntensityLocation == 0xFFFFFFFF ||
+  m_dirLightLocation.color            =   GetUniformLocation ( "gDirectionalLight.color" );
+  m_dirLightLocation.ambientIntensity =   GetUniformLocation ( "gDirectionalLight.ambientIntensity" );
+  m_dirLightLocation.diffuseIntensity =   GetUniformLocation ( "gDirectionalLight.diffuseIntensity" );
+  m_dirLightLocation.direction        =   GetUniformLocation ( "gDirectionalLight.direction" );
+
+  if ( 
     m_WVPLocation == 0xFFFFFFFF ||
+    m_WorldMatrixLocation == 0xFFFFFFFF ||
     m_samplerLocation == 0xFFFFFFFF ||
-    m_dirLightColorLocation == 0xFFFFFFFF )
+    m_dirLightLocation.ambientIntensity == 0xFFFFFFFF ||
+    m_dirLightLocation.color == 0xFFFFFFFF ||
+    m_dirLightLocation.diffuseIntensity == 0xFFFFFFFF ||
+    m_dirLightLocation.direction == 0xFFFFFFFF )
   {
     return false;
   }
@@ -84,11 +88,15 @@ bool LightingTechnique::Init ( )
 }
 
 
-void LightingTechnique::SetWVP ( const Matrix4f* WVP )
+void LightingTechnique::SetWVP ( const Matrix4f& WVP )
 {
-  glUniformMatrix4fv ( m_WVPLocation, 1, GL_TRUE, reinterpret_cast< const GLfloat* >( WVP->m ) );
+  glUniformMatrix4fv ( m_WVPLocation, 1, GL_TRUE, reinterpret_cast< const GLfloat* >( WVP.m ) );
 }
 
+void LightingTechnique::SetWorldMatrix ( const Matrix4f& WorldInverse )
+{
+  glUniformMatrix4fv ( m_WorldMatrixLocation, 1, GL_TRUE, ( const GLfloat* ) WorldInverse.m );
+}
 
 void LightingTechnique::SetTextureUnit ( unsigned int textureUnit )
 {
@@ -98,6 +106,11 @@ void LightingTechnique::SetTextureUnit ( unsigned int textureUnit )
 
 void LightingTechnique::SetDirectionalLight ( const DirectionLight& light )
 {
-  glUniform3f ( m_dirLightColorLocation, light.color.x, light.color.y, light.color.z );
-  glUniform1f ( m_dirLightAmbientIntensityLocation, light.ambientIntensity );
+  glUniform3f ( m_dirLightLocation.color, light.color.x, light.color.y, light.color.z );
+  glUniform1f ( m_dirLightLocation.ambientIntensity, light.ambientIntensity );
+
+  Vector3f direction = light.direction;
+  direction.Normalize ( );
+  glUniform3f ( m_dirLightLocation.direction, direction.x, direction.y, direction.z );
+  glUniform1f ( m_dirLightLocation.diffuseIntensity, light.diffuseIntensity );
 }
