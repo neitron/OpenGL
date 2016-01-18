@@ -17,42 +17,36 @@ public:
   
   Camera(int WindowWidth, int WindowHeight, const Vector3f& Pos, const Vector3f& Target, const Vector3f& Up);
   
-  void Camera::Init();
-  void Camera::OnMouse(int x, int y);
-  void Camera::OnRender();
-  void Camera::Update();
-  bool OnKeyboard(int Key);
+  void OnMouse(int x, int y);
+  void OnRender();
+  bool OnKeyboard(int key);
 
   const Vector3f& GetPos()    const;
   const Vector3f& GetTarget() const;
   const Vector3f& GetUp()     const;
- 
-  
 
 private:
+
+  void Init ( );
+  void Update ( );
 
   Vector3f m_pos;
   Vector3f m_target;
   Vector3f m_up;
 
-  Vector3f m_mousePos;
+  Vector2i m_mousePos;
 
   int m_windowWidth;
   int m_windowHeight;
   
   float m_AngleH;
   float m_AngleV;
-  
-  bool m_OnUpperEdge;
-  bool m_OnLowerEdge;
-  bool m_OnLeftEdge;
-  bool m_OnRightEdge;
 
   static float STEP_SIZE_MOUSE; // MOUSE motion cam step
 
-  static const float STEP_SIZE;       // arrows motion cam step
+  static const float STEP_SIZE; // arrows motion cam step
   
-  static const int MARGIN;  // auto rotate cam mardin screen
+  static const int MARGIN;      // auto rotate cam mardin screen
 };
 
 #endif /*CAMERA_H*/

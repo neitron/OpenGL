@@ -14,6 +14,7 @@ uniform mat4 gWorld;
 
 out vec2 texCoord0;
 out vec3 normal0;
+out vec3 worldPos0;
                                
 void main ( void )
 {
@@ -21,4 +22,6 @@ void main ( void )
 	texCoord0 = texCoord;
 
 	normal0 = ( gWorld * vec4( normal, 0.0 ) ).xyz;
+
+	worldPos0   = ( gWorld * vec4( position, 1.0 ) ).xyz;
 }

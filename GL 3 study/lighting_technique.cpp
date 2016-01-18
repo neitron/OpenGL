@@ -72,6 +72,10 @@ bool LightingTechnique::Init ( )
   m_dirLightLocation.diffuseIntensity =   GetUniformLocation ( "gDirectionalLight.diffuseIntensity" );
   m_dirLightLocation.direction        =   GetUniformLocation ( "gDirectionalLight.direction" );
 
+  m_eyeWorldPosLocation           = GetUniformLocation ( "gEyeWorldPos" );
+  m_matSpecularIntensityLocation  = GetUniformLocation ( "gMatSpecularIntensity" );
+  m_matSpecularPowerLocation      = GetUniformLocation ( "gSpecularPower" );
+
   if ( 
     m_WVPLocation == 0xFFFFFFFF ||
     m_WorldMatrixLocation == 0xFFFFFFFF ||
@@ -79,7 +83,10 @@ bool LightingTechnique::Init ( )
     m_dirLightLocation.ambientIntensity == 0xFFFFFFFF ||
     m_dirLightLocation.color == 0xFFFFFFFF ||
     m_dirLightLocation.diffuseIntensity == 0xFFFFFFFF ||
-    m_dirLightLocation.direction == 0xFFFFFFFF )
+    m_dirLightLocation.direction == 0xFFFFFFFF ||
+    m_eyeWorldPosLocation == 0xFFFFFFFF ||
+    m_matSpecularIntensityLocation == 0xFFFFFFFF ||
+    m_matSpecularPowerLocation == 0xFFFFFFFF )
   {
     return false;
   }
@@ -103,6 +110,20 @@ void LightingTechnique::SetTextureUnit ( unsigned int textureUnit )
   glUniform1i ( m_samplerLocation, textureUnit );
 }
 
+void LightingTechnique::SetMatSpecularIntensity ( float intensity )
+{
+  glUniform1f ( m_matSpecularIntensityLocation, intensity );
+}
+
+void LightingTechnique::SetMatSpecularPower ( float power )
+{
+  glUniform1f ( m_matSpecularPowerLocation, power );
+}
+
+void LightingTechnique::SetEyeWorldPos ( const Vector3f& eyeWorldPos )
+{
+  glUniform3f ( m_eyeWorldPosLocation, eyeWorldPos.x, eyeWorldPos.y, eyeWorldPos.z );
+}
 
 void LightingTechnique::SetDirectionalLight ( const DirectionLight& light )
 {

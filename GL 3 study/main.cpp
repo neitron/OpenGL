@@ -1,10 +1,7 @@
 #pragma once
 
-#include <string.h>
-#include <iostream>
-#include <fstream>
-#include <stdio.h>
-#include <assert.h>
+#include <stdlib.h>
+
 
 #include <GL/glew.h>
 #include <GL/glut.h>
@@ -68,10 +65,12 @@ public:
 
     m_pGameCamera = new Camera ( WINDOW_WIDTH, WINDOW_HEIGHT, pos, target, up );
 
-    unsigned int indices[] = {  0, 3, 1,
-                                1, 3, 2,
-                                2, 3, 0,
-                                1, 2, 0   };
+    unsigned int indices[] = {
+                                 0, 3, 1,
+                                 1, 3, 2,
+                                 2, 3, 0,
+                                 1, 2, 0
+                             };
 
     CreateIndexBuffer ( indices, sizeof ( indices ) );
 
@@ -123,6 +122,9 @@ public:
     m_pEffect->SetWorldMatrix ( WorldTransformation );
     m_pEffect->SetDirectionalLight ( m_directionalLight );
 
+    m_pEffect->SetEyeWorldPos ( m_pGameCamera->GetPos ( ) );
+    m_pEffect->SetMatSpecularIntensity ( 1.0f );
+    m_pEffect->SetMatSpecularPower ( 32.0f );
 
     // Подключаем атрибут (так же как и в вершинном шейдере)
     // 1: номер атрибута
@@ -178,7 +180,7 @@ public:
     switch ( key )
     {
     case 'q':
-      exit ( 1 );
+      std::exit ( EXIT_SUCCESS );
       break;
 
     case '+':

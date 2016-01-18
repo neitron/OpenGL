@@ -87,7 +87,7 @@ void GLUTBackendRun ( ICallbacks* pCallbacks )
 
   // GL_COLOR_BUFFER_BIT теперь следующего цвета
   glClearColor ( 0.1f, 0.1f, 0.1f, 1.0f );
-
+  
   // Не рендерить то, что мы не видим
   // сообщаем, что вершины подаются по часовой стрелке
   glFrontFace ( GL_CW );

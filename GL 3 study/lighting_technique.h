@@ -27,7 +27,14 @@ public:
   void SetWorldMatrix ( const Matrix4f& WorldInverse );
   // Указывает единицу текстуры в сэмплере
   void SetTextureUnit ( unsigned int textureUnit );         
+  
+  // Фоновое освещение
   void SetDirectionalLight ( const DirectionLight& light );
+
+  // Отраженный свет
+  void SetEyeWorldPos ( const Vector3f& eyeWorldPos );  // зритель
+  void SetMatSpecularIntensity ( float intensity );     // интенсивность отражения
+  void SetMatSpecularPower ( float power );             // степень отражения материала
 
 private:
 
@@ -35,7 +42,11 @@ private:
   GLuint m_WorldMatrixLocation;
 
   GLuint m_samplerLocation;
-  
+                                                
+  GLuint m_eyeWorldPosLocation;           // зритель
+  GLuint m_matSpecularIntensityLocation;  // интенсивность отражения
+  GLuint m_matSpecularPowerLocation;      // степень отражения материала
+                                          
   struct 
   {
     GLuint color;
