@@ -39,10 +39,12 @@ class Main : public ICallbacks
 public:
 
   Main ( ) :
-    m_pGameCamera ( nullptr ),
-    m_pTexture    ( nullptr ),
-    m_pEffect     ( nullptr ),
-    m_Scale       ( 0.0f )
+    m_pGameCamera       ( nullptr ),
+    m_pTexture          ( nullptr ),
+    m_pEffect           ( nullptr ),
+    m_Scale             ( 0.0f ),
+    m_specularPower     ( 16.0f ),
+    m_specularIntensity ( 1.0f )
   {
     m_directionalLight.color            = Vector3f ( 1.0f, 1.0f, 1.0f );
     m_directionalLight.ambientIntensity = 0.0f;
@@ -89,7 +91,7 @@ public:
 
     m_pEffect->SetTextureUnit ( 0 );
 
-    m_pTexture = new Texture ( GL_TEXTURE_2D, "Content/test_01.png" );
+    m_pTexture = new Texture ( GL_TEXTURE_2D, "Content/metal.jpg" );
 
     if ( !m_pTexture->Load ( ) )
       return false;
@@ -123,8 +125,8 @@ public:
     m_pEffect->SetDirectionalLight ( m_directionalLight );
 
     m_pEffect->SetEyeWorldPos ( m_pGameCamera->GetPos ( ) );
-    m_pEffect->SetMatSpecularIntensity ( 1.0f );
-    m_pEffect->SetMatSpecularPower ( 32.0f );
+    m_pEffect->SetMatSpecularIntensity ( m_specularIntensity );
+    m_pEffect->SetMatSpecularPower ( m_specularPower );
 
     // ѕодключаем атрибут (так же как и в вершинном шейдере)
     // 1: номер атрибута
@@ -144,9 +146,9 @@ public:
     // 4: нормализировать атрибуты или нет
     // 5: число байтов между 2 атрибутами (одного типа)
     // 6: смещение в структуре (с какой позиции начинаютс€ данные даного атрибута)
-    glVertexAttribPointer ( 0, 3, GL_FLOAT, GL_FALSE, sizeof ( Vertex ), nullptr );
-    glVertexAttribPointer ( 1, 2, GL_FLOAT, GL_FALSE, sizeof ( Vertex ), reinterpret_cast<const GLvoid*>( sizeof ( GLfloat ) * 3 ) );
-    glVertexAttribPointer ( 2, 3, GL_FLOAT, GL_FALSE, sizeof ( Vertex ), ( const GLvoid* ) 20 );
+    glVertexAttribPointer ( 0, 3, GL_FLOAT, GL_FALSE, sizeof ( Vertex ), nullptr );   // ѕозиции вершин (локальные)
+    glVertexAttribPointer ( 1, 2, GL_FLOAT, GL_FALSE, sizeof ( Vertex ), reinterpret_cast<const GLvoid*>( sizeof ( GLfloat ) * 3 ) ); // —оответствующие координаты текстуры 
+    glVertexAttribPointer ( 2, 3, GL_FLOAT, GL_FALSE, sizeof ( Vertex ), ( const GLvoid* ) 20 );    // ¬екторы нормалей вершин
 
     // јктивный буфер
     glBindBuffer ( GL_ELEMENT_ARRAY_BUFFER, m_IBO );
@@ -206,6 +208,22 @@ public:
     case 'x':
       m_directionalLight.diffuseIntensity -= 0.05f;
       break;
+
+    case 'd':
+      m_specularPower *= 2.0f;
+      break;
+
+    case 'f':
+      m_specularPower /= 2.0f;
+      break;
+
+    case 'c':
+      m_specularIntensity += 0.05f;
+      break;
+
+    case 'v':
+      m_specularIntensity -= 0.05f;
+      break;
     }
   }
 
@@ -219,10 +237,10 @@ private:
   void CreateVertexBuffer ( const unsigned int* pIndices, unsigned int indexCount )
   {
     // 3 vertices
-    Vertex vertices[4] = {  Vertex ( Vector3f ( -1.0f, -1.0f, 0.5773f ),  Vector2f ( 0.0f, 0.0f ) ),
-                            Vertex ( Vector3f ( 0.0f, -1.0f, -1.15475 ),  Vector2f ( 0.5f, 0.0f ) ),
-                            Vertex ( Vector3f ( 1.0f, -1.0f, 0.5773f ),   Vector2f ( 1.0f, 0.0f ) ),
-                            Vertex ( Vector3f ( 0.0f, 1.0f, 0.0f ),       Vector2f ( 0.5f, 1.0f ) ) };
+    Vertex vertices[4] = {  Vertex ( Vector3f ( -1.0f, -1.0f, 0.5773f ),  Vector2f ( 0.0f, 0.0f ) ),    //Vector2f ( 0.0f, 0.0f )
+                            Vertex ( Vector3f ( 0.0f, -1.0f, -1.15475 ),  Vector2f ( 1.0f, 0.0f ) ),    //Vector2f ( 0.5f, 0.0f )
+                            Vertex ( Vector3f ( 1.0f, -1.0f, 0.5773f ),   Vector2f ( 2.0f, 0.0f ) ),    //Vector2f ( 1.0f, 0.0f )
+                            Vertex ( Vector3f ( 0.0f, 1.0f, 0.0f ),       Vector2f ( 1.0f, 2.0f ) ) };  //Vector2f ( 0.5f, 1.0f )
 
     unsigned int vertexCount = ARRAY_SIZE_IN_ELEMENTS ( vertices );
 
@@ -244,15 +262,6 @@ private:
 
   void CreateIndexBuffer ( const unsigned int* pIndices, unsigned int sizeInBytes )
   {
-    //// indeces
-    //unsigned int indeces[] =
-    //{ 
-    //  0, 3, 1,
-    //  1, 3, 2,
-    //  2, 3, 0,
-    //  1, 2, 0 // or 0, 1, 2 
-    //};
-
     // Generate of buffer 
     //  | 1: кол VBO
     //  | 2: cсылка на масив дл€ хранени€ ID буферов
@@ -304,6 +313,9 @@ private:
 
   LightingTechnique* m_pEffect;
   DirectionLight m_directionalLight;
+
+  float m_specularPower;
+  float m_specularIntensity;
 
   float m_Scale;
 };
