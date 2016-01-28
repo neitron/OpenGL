@@ -29,9 +29,11 @@
     <ClInclude Include="pipeline.h" />
     <ClInclude Include="technique.h" />
     <ClInclude Include="texture.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FS.glsl" />
+    <None Include="FS_Fail.glsl" />
     <None Include="temp.glsl" />
     <None Include="VS.glsl" />
   </ItemGroup>

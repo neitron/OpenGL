@@ -1,22 +1,22 @@
-#version 330          
+//#version 330          
                       
-in vec2 TexCoord0;
+//in vec2 TexCoord0;
                                         
-out vec4 FragColor;                                                                 
+//out vec4 FragColor;                                                                 
                                                                                     
-struct DirectionalLight                                                             
-{                                                                                   
-    vec3	color;                                                                     
-    float	ambientIntensity;                                                         
-};                                                                                  
+//struct DirectionalLight                                                             
+//{                                                                                   
+//    vec3	color;                                                                     
+//    float	ambientIntensity;                                                         
+//};                                                                                  
                                                                                     
-uniform DirectionalLight gDirectionalLight;                                         
-uniform sampler2D gSampler;        
+//uniform DirectionalLight gDirectionalLight;                                         
+//uniform sampler2D gSampler;        
                 
 //uniform float gWave;    	
 			       
-void main()                                         
-{   
+//void main()                                         
+//{   
 	// texture move ()
 	//vec2 newPos = TexCoord0;
 	
@@ -39,12 +39,12 @@ void main()
 	//float colorWBComponent = ( colorBlur.x + colorBlur.y + colorBlur.z ) / 3.0; // Black&Whait
 	//vec4 colorWB = vec4(colorWBComponent, colorWBComponent, colorWBComponent, 1.0);
 
-	FragColor = texture2D(gSampler, TexCoord0.xy) *                                 
-                vec4(gDirectionalLight.color, 1.0f) *                               
-                gDirectionalLight.ambientIntensity;
+	//FragColor = texture2D(gSampler, TexCoord0.xy) *                                 
+ //               vec4(gDirectionalLight.color, 1.0f) *                               
+ //               gDirectionalLight.ambientIntensity;
 
 
 	//FragColor.rgb *= FragColor.a;
 	//FragColor = vec4(1.0 - FragColor.rgb, 1.0); // inverse
 	
-}
+//}

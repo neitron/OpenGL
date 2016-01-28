@@ -24,21 +24,23 @@ struct BaseLight
 
 struct DirectionalLight                                                             
 {
-  BaseLight   base;
-  vec3        direction;
+  vec3      direction;
 };
 
 struct PointLight                                                             
 {
-  BaseLight     base;
   Attenuation   atten;
   vec3		      position;
 };
 
 
 uniform PointLight			  gPointLights [ MAX_POINT_LIGHTS ];
+uniform BaseLight         gPointBaseLights [ MAX_POINT_LIGHTS ];
+
 uniform int					      gNumPointLights;
+
 uniform DirectionalLight	gDirectionalLight;
+uniform BaseLight         gDirectionalBaseLight;
 
 uniform sampler2D			gSampler;
 
@@ -46,17 +48,14 @@ uniform vec3				gEyeWorldPos;
 uniform float				gMatSpecularIntensity;
 uniform float				gSpecularPower;
 
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
 vec4 CalcLightInternal ( BaseLight light, vec3 lightDirection, vec3 normal )
 {
   vec4	ambientColor	= vec4 ( light.color, 1.0f ) * light.ambientIntensity;
-  vec4  diffuseColor  = vec4 ( 0.0f, 0.0f, 0.0f, 0.0f );
-  vec4  specularColor = vec4 ( 0.0f, 0.0f, 0.0f, 0.0f );
-  
   float	diffuseFactor	= dot ( normal, -lightDirection );
 
+  vec4 diffuseColor  = vec4 ( 0.0f, 0.0f, 0.0f, 0.0f );
+  vec4 specularColor = vec4 ( 0.0f, 0.0f, 0.0f, 0.0f );
+  
   if ( diffuseFactor > 0.0f ) 
   {
     diffuseColor = vec4 ( light.color, 1.0f ) * light.diffuseIntensity * diffuseFactor;
@@ -71,29 +70,22 @@ vec4 CalcLightInternal ( BaseLight light, vec3 lightDirection, vec3 normal )
     {
       specularColor = vec4 ( light.color, 1.0f ) * gMatSpecularIntensity * specularFactor;
     }
-  }
-
-  return ( ambientColor + diffuseColor + specularColor );
+ }
+    return ( ambientColor + diffuseColor + specularColor );
 }
 
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 vec4 CalcDirectionalLight ( vec3 normal )
 {
-     return CalcLightInternal ( gDirectionalLight.base, gDirectionalLight.direction, normal);
+     return CalcLightInternal ( gDirectionalBaseLight, gDirectionalLight.direction, normal);
 }
 
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 vec4 CalcPointLight ( int index, vec3 normal )
 {
     vec3  lightDirection = worldPos0 - gPointLights[ index ].position;
     float distanceVar = length ( lightDirection );
     lightDirection = normalize ( lightDirection );
  
-    vec4  color = CalcLightInternal ( gPointLights[ index ].base, lightDirection, normal);
+    vec4  color = CalcLightInternal ( gPointBaseLights[index], lightDirection, normal);
     
     float attenuation =  
                   gPointLights[ index ].atten.constant +
@@ -103,27 +95,16 @@ vec4 CalcPointLight ( int index, vec3 normal )
     return color / attenuation;
 }
 			       
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void main ( void )
 {
   vec3 normal = normalize ( normal0 );
   
-  gDirectionalLight.base.color;
-  gDirectionalLight.base.ambientIntensity;
-  gDirectionalLight.base.diffuseIntensity;
-
-  gPointLights[ 0 ].base.color;
-  gPointLights[ 0 ].base.ambientIntensity;
-  gPointLights[ 0 ].base.diffuseIntensity;
-
   vec4 totalLight = CalcDirectionalLight ( normal );
   
-  for ( int index = 0; index < gNumPointLights; index++ ) 
+  for ( int i = 0; i < gNumPointLights; i++ ) 
   {
-    totalLight += CalcPointLight ( index, normal );
+    totalLight += CalcPointLight ( i, normal );
   }
   
-  fragColor = texture2D ( gSampler, texCoord0 ) * totalLight;
+  fragColor = texture2D(gSampler, texCoord0) * totalLight;
 }

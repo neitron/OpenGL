@@ -4,10 +4,11 @@
 #include <fstream>
 
 #include "lighting_technique.h"
-
+#include "utils.h"
 
 LightingTechnique::LightingTechnique ( )
-{ }
+{ 
+}
 
 
 bool LightingTechnique::SetShader ( const char* pFilename, char* &pShaderText )
@@ -64,29 +65,76 @@ bool LightingTechnique::Init ( )
   }
 
   m_WVPLocation         = GetUniformLocation ( "gWVP" );
-  m_samplerLocation     = GetUniformLocation ( "gSampler" );
   m_WorldMatrixLocation = GetUniformLocation ( "gWorld" );
+  m_samplerLocation     = GetUniformLocation ( "gSampler" );
 
-  m_dirLightLocation.color            =   GetUniformLocation ( "gDirectionalLight.color" );
-  m_dirLightLocation.ambientIntensity =   GetUniformLocation ( "gDirectionalLight.ambientIntensity" );
-  m_dirLightLocation.diffuseIntensity =   GetUniformLocation ( "gDirectionalLight.diffuseIntensity" );
+  m_dirLightLocation.color            =   GetUniformLocation ( "gDirectionalLight.base.color" );
+  m_dirLightLocation.ambientIntensity =   GetUniformLocation ( "gDirectionalLight.base.ambientIntensity" );
+  m_dirLightLocation.diffuseIntensity =   GetUniformLocation ( "gDirectionalLight.base.diffuseIntensity" );
   m_dirLightLocation.direction        =   GetUniformLocation ( "gDirectionalLight.direction" );
 
   m_eyeWorldPosLocation           = GetUniformLocation ( "gEyeWorldPos" );
   m_matSpecularIntensityLocation  = GetUniformLocation ( "gMatSpecularIntensity" );
   m_matSpecularPowerLocation      = GetUniformLocation ( "gSpecularPower" );
 
+  m_numPointLightsLocation = GetUniformLocation ( "gNumPointLights" );
+
+
+  for ( unsigned int i = 0; i < ARRAY_SIZE_IN_ELEMENTS ( m_pointLightsLocation ); i++ ) 
+  {
+    char name[128] = { 0 };
+
+    _snprintf_s ( name, sizeof ( name ), "gPointLights[%d].base.color", i );
+    m_pointLightsLocation[i].color = GetUniformLocation ( name );
+
+    _snprintf_s ( name, sizeof ( name ), "gPointLights[%d].base.ambientIntensity", i );
+    m_pointLightsLocation[i].ambientIntensity = GetUniformLocation ( name );
+
+    _snprintf_s ( name, sizeof ( name ), "gPointLights[%d].base.diffuseIntensity", i );
+    m_pointLightsLocation[i].diffuseIntensity = GetUniformLocation ( name );
+
+    _snprintf_s ( name, sizeof ( name ), "gPointLights[%d].position", i );
+    m_pointLightsLocation[i].position = GetUniformLocation ( name );
+
+    
+
+    _snprintf_s ( name, sizeof ( name ), "gPointLights[%d].atten.constant", i );
+    m_pointLightsLocation[i].atten.constant = GetUniformLocation ( name );
+
+    _snprintf_s ( name, sizeof ( name ), "gPointLights[%d].atten.linear", i );
+    m_pointLightsLocation[i].atten.linear = GetUniformLocation ( name );
+
+    _snprintf_s ( name, sizeof ( name ), "gPointLights[%d].atten.expVar", i );
+    m_pointLightsLocation[i].atten.exp = GetUniformLocation ( name );
+
+    if (
+      m_pointLightsLocation[i].color            == INVALID_UNIFORM_LOCATION ||
+      m_pointLightsLocation[i].ambientIntensity == INVALID_UNIFORM_LOCATION ||
+      m_pointLightsLocation[i].position         == INVALID_UNIFORM_LOCATION ||
+      m_pointLightsLocation[i].diffuseIntensity == INVALID_UNIFORM_LOCATION ||
+      m_pointLightsLocation[i].atten.constant   == INVALID_UNIFORM_LOCATION ||
+      m_pointLightsLocation[i].atten.linear     == INVALID_UNIFORM_LOCATION ||
+      m_pointLightsLocation[i].atten.exp        == INVALID_UNIFORM_LOCATION 
+      ) 
+    {
+      return false;
+    }
+  }
+
+
   if ( 
-    m_WVPLocation == 0xFFFFFFFF ||
-    m_WorldMatrixLocation == 0xFFFFFFFF ||
-    m_samplerLocation == 0xFFFFFFFF ||
-    m_dirLightLocation.ambientIntensity == 0xFFFFFFFF ||
-    m_dirLightLocation.color == 0xFFFFFFFF ||
-    m_dirLightLocation.diffuseIntensity == 0xFFFFFFFF ||
-    m_dirLightLocation.direction == 0xFFFFFFFF ||
-    m_eyeWorldPosLocation == 0xFFFFFFFF ||
-    m_matSpecularIntensityLocation == 0xFFFFFFFF ||
-    m_matSpecularPowerLocation == 0xFFFFFFFF )
+    m_WVPLocation                         == INVALID_UNIFORM_LOCATION ||
+    m_WorldMatrixLocation                 == INVALID_UNIFORM_LOCATION ||
+    m_samplerLocation                     == INVALID_UNIFORM_LOCATION ||
+    m_dirLightLocation.ambientIntensity   == INVALID_UNIFORM_LOCATION ||
+    m_dirLightLocation.color              == INVALID_UNIFORM_LOCATION ||
+    m_dirLightLocation.diffuseIntensity   == INVALID_UNIFORM_LOCATION ||
+    m_dirLightLocation.direction          == INVALID_UNIFORM_LOCATION ||
+    m_eyeWorldPosLocation                 == INVALID_UNIFORM_LOCATION ||
+    m_matSpecularIntensityLocation        == INVALID_UNIFORM_LOCATION ||
+    m_matSpecularPowerLocation            == INVALID_UNIFORM_LOCATION ||
+    m_numPointLightsLocation              == INVALID_UNIFORM_LOCATION 
+    )
   {
     return false;
   }
@@ -132,6 +180,23 @@ void LightingTechnique::SetDirectionalLight ( const DirectionLight& light )
 
   Vector3f direction = light.direction;
   direction.Normalize ( );
+
   glUniform3f ( m_dirLightLocation.direction, direction.x, direction.y, direction.z );
   glUniform1f ( m_dirLightLocation.diffuseIntensity, light.diffuseIntensity );
+}
+
+void LightingTechnique::SetPointLights ( unsigned int numLights, const PointLight* pLights )
+{
+  glUniform1i ( m_numPointLightsLocation, numLights );
+
+  for ( unsigned int i = 0; i < numLights; i++ ) 
+  {
+    glUniform3f ( m_pointLightsLocation[i].color,             pLights[i].color.x, pLights[i].color.y, pLights[i].color.z );
+    glUniform1f ( m_pointLightsLocation[i].ambientIntensity,  pLights[i].ambientIntensity );
+    glUniform1f ( m_pointLightsLocation[i].diffuseIntensity,  pLights[i].diffuseIntensity );
+    glUniform3f ( m_pointLightsLocation[i].position,          pLights[i].position.x, pLights[i].position.y, pLights[i].position.z );
+    glUniform1f ( m_pointLightsLocation[i].atten.constant,    pLights[i].attenuation.constant );
+    glUniform1f ( m_pointLightsLocation[i].atten.linear,      pLights[i].attenuation.linear );
+    glUniform1f ( m_pointLightsLocation[i].atten.exp,         pLights[i].attenuation.exp );
+  }
 }

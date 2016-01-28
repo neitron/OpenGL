@@ -12,8 +12,8 @@
 #include "texture.h"
 #include "glut_backend.h"
 #include "lighting_technique.h"
+#include "utils.h"
 
-#define ARRAY_SIZE_IN_ELEMENTS(a) (sizeof(a)/sizeof(a[0]))
 
 const int WINDOW_WIDTH    = 1300;
 const int WINDOW_HEIGHT   = 700;
@@ -112,21 +112,48 @@ public:
 
     m_Scale += 0.01;
 
+    
+    // Конвеер для создания матрици трасформаций
     Pipeline p;
     p.Rotate ( 0.0f, m_Scale, 0.0f );
     p.WorldPos ( 0.0f, 0.0f, 1.0f );
     p.SetCamera ( m_pGameCamera->GetPos ( ), m_pGameCamera->GetTarget ( ), m_pGameCamera->GetUp ( ) );
     p.SetPerspectiveProj ( 60.0f, WINDOW_WIDTH, WINDOW_HEIGHT, 1.0f, 100.0f );
 
+    // Матрици трансформаций
     m_pEffect->SetWVP ( p.GetWVPTrans ( ) );
     const Matrix4f& WorldTransformation = p.GetWorldTrans ( );
-
     m_pEffect->SetWorldMatrix ( WorldTransformation );
+    
+    // Направленный свет
     m_pEffect->SetDirectionalLight ( m_directionalLight );
 
+    // Отраженный свет
     m_pEffect->SetEyeWorldPos ( m_pGameCamera->GetPos ( ) );
     m_pEffect->SetMatSpecularIntensity ( m_specularIntensity );
     m_pEffect->SetMatSpecularPower ( m_specularPower );
+
+    // Точечный свет
+    const int COUNT_OF_POINT_LIGHTS = 3;
+    PointLight pl[COUNT_OF_POINT_LIGHTS];
+
+    pl[0].diffuseIntensity = 0.5f;
+    pl[0].color = Vector3f ( 1.0f, 0.0f, 0.0f );
+    pl[0].position = Vector3f ( sinf ( m_Scale ) * 10, 1.0f, cosf ( m_Scale ) * 10 );
+    pl[0].attenuation.linear = 0.1f;
+
+    pl[1].diffuseIntensity = 0.5f;
+    pl[1].color = Vector3f ( 0.0f, 1.0f, 0.0f );
+    pl[1].position = Vector3f ( sinf ( m_Scale + 2.1f ) * 10, 1.0f, cosf ( m_Scale + 2.1f ) * 10 );
+    pl[1].attenuation.linear = 0.1f;
+
+    pl[2].diffuseIntensity = 0.5f;
+    pl[2].color = Vector3f ( 0.0f, 0.0f, 1.0f );
+    pl[2].position = Vector3f ( sinf ( m_Scale + 4.2f ) * 10, 1.0f, cosf ( m_Scale + 4.2f ) * 10 );
+    pl[2].attenuation.linear = 0.1f;
+
+    m_pEffect->SetPointLights ( COUNT_OF_POINT_LIGHTS, pl );
+
 
     // Подключаем атрибут (так же как и в вершинном шейдере)
     // 1: номер атрибута

@@ -95,6 +95,8 @@ void GLUTBackendRun ( ICallbacks* pCallbacks )
   glCullFace ( GL_BACK );
   // не рендерь не видные нам плоскости
   glEnable ( GL_CULL_FACE );
+  // тест глубины
+  //glEnable ( GL_DEPTH_TEST );
 
   s_pCallbacks = pCallbacks;
   

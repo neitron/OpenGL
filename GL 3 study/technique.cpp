@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "technique.h"
+#include "utils.h"
 
 Technique::Technique ( ) :
   m_shaderProgram ( 0 )
@@ -131,7 +132,7 @@ GLint Technique::GetUniformLocation ( const char* pUniformName )
 {
   GLint location = glGetUniformLocation ( m_shaderProgram, pUniformName );
 
-  if ( location != 0xFFFFFFFF )
+  if ( location == INVALID_UNIFORM_LOCATION )
   {
     fprintf ( stderr, "Warning! Unable to get the location of uniform '%s'\n", pUniformName );
   }

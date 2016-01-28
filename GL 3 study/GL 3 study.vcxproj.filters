@@ -71,15 +71,21 @@
     <ClInclude Include="technique.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="VS.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="FS.glsl">
+    <None Include="temp.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="temp.glsl">
+    <None Include="FS_Fail.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="FS.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

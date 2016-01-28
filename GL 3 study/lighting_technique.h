@@ -6,12 +6,49 @@
 #include "technique.h"
 #include "math3d.h"
 
-struct DirectionLight
+const unsigned int MAX_POINT_LIGHTS = 3u; // Максимальное количество источников света
+
+struct BaseLight
 {
-  Vector3f  color;
-  float     ambientIntensity;
-  Vector3f  direction;
-  float     diffuseIntensity;
+  Vector3f  color;            // Цвет света
+  float     ambientIntensity; // Интенсивность вонового света (генерального)
+  float     diffuseIntensity; // Интенсивность скользящего света (от источника)
+
+  BaseLight ( ) :
+    color             ( Vector3f ( 0.0f, 0.0f, 0.0f ) ),
+    ambientIntensity  (0.0f),
+    diffuseIntensity  (0.0f)
+  { }
+};
+
+struct DirectionLight : BaseLight
+{
+  Vector3f  direction;  // направление освещения (от направленого света)
+
+  DirectionLight ( ) :
+    direction ( Vector3f ( 0.0f, 0.0f, 0.0f ) )
+  { }
+};
+
+struct PointLight : BaseLight
+{
+  Vector3f  position;
+
+  // Параметры затухания для более гибкого управления точечным светом
+  struct
+  {
+    float constant;
+    float linear;
+    float exp;
+  } attenuation; // Затухание
+
+  PointLight ( ):
+    position ( Vector3f ( 0.0f, 0.0f, 0.0f ) )
+  {
+    attenuation.constant = 1.0f;
+    attenuation.linear = 0.0f;
+    attenuation.exp = 0.0f;
+  }
 };
 
 class LightingTechnique : public Technique
@@ -21,41 +58,76 @@ public:
   LightingTechnique ( );
   virtual bool Init ( );
 
+  // Задает шейдер
   bool SetShader ( const char* pFilename, char* &pShaderText );
-
+  // Матрица преобразования (world view projection)
   void SetWVP ( const Matrix4f& WVP );
+  // Мировая матрица преобразования
   void SetWorldMatrix ( const Matrix4f& WorldInverse );
   // Указывает единицу текстуры в сэмплере
-  void SetTextureUnit ( unsigned int textureUnit );         
-  
-  // Фоновое освещение
+  void SetTextureUnit ( unsigned int textureUnit ); 
+
+  // Направленное освещение:
+  // Устанавливает направленное освещение
   void SetDirectionalLight ( const DirectionLight& light );
 
-  // Отраженный свет
-  void SetEyeWorldPos ( const Vector3f& eyeWorldPos );  // зритель
-  void SetMatSpecularIntensity ( float intensity );     // интенсивность отражения
-  void SetMatSpecularPower ( float power );             // степень отражения материала
+  // Отраженный свет:
+  // Устанавливает в шейдере позицию зрителя
+  void SetEyeWorldPos           ( const Vector3f& eyeWorldPos );  
+  // Устанавливает в шейдере интенсивность отраженного света
+  void SetMatSpecularIntensity  ( float intensity );              
+  // Устанавливает в шейдере степень отражения материала
+  void SetMatSpecularPower      ( float power );                  
+
+  // Точечный свет:
+  // Устанавливает несколько источников света
+  void SetPointLights ( unsigned int numLights, const PointLight* pLights );
 
 private:
+
+  // Расположения Юниформ (далее Ю) в шейдерах:
+  // 1 Матриц преобразований:
 
   GLuint m_WVPLocation;
   GLuint m_WorldMatrixLocation;
 
-  GLuint m_samplerLocation;
-                                                
-  GLuint m_eyeWorldPosLocation;           // зритель
-  GLuint m_matSpecularIntensityLocation;  // интенсивность отражения
-  GLuint m_matSpecularPowerLocation;      // степень отражения материала
-                                          
+  GLuint m_samplerLocation; // Ю-позиция семплера текстуры
+                               
+  // 2 Отраженного света:
+
+  GLuint m_eyeWorldPosLocation;           // Ю-позиция зритель
+  GLuint m_matSpecularIntensityLocation;  // Ю-позиция интенсивности отражения
+  GLuint m_matSpecularPowerLocation;      // Ю-позиция степени отражения материала
+                              
+  GLuint m_numPointLightsLocation; // Ю-позиция семплера текстуры
+
+  // 3 Направленного света
+
   struct 
   {
     GLuint color;
     GLuint ambientIntensity;
     GLuint direction;
     GLuint diffuseIntensity;
-  } m_dirLightLocation;
+  } m_dirLightLocation; // Ю-позиция направленного источника света
 
+  // 4 Точечного света
 
+  struct 
+  {
+    GLuint color;
+    GLuint ambientIntensity;
+    GLuint diffuseIntensity;
+    GLuint position;
+
+    struct
+    {
+      GLuint constant;
+      GLuint linear;
+      GLuint exp;
+    } atten;
+
+  } m_pointLightsLocation[MAX_POINT_LIGHTS]; // Массив Ю-позиций источников точечного света
 };
 
-#endif // LIGHTINGTECHNIQUE_H
+#endif /* LIGHTINGTECHNIQUE_H */
