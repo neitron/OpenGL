@@ -49,7 +49,7 @@ void Mesh::Clear ( )
 
 bool Mesh::LoadMesh ( const std::string& filename )
 {
-  // Release the previously loaded mesh (if it exists)
+  // Удаляем данные предыдущей модели (если она была загружена)
   Clear ( );
 
   Assimp::Importer importer;
@@ -75,10 +75,10 @@ bool Mesh::LoadMesh ( const std::string& filename )
 
 bool Mesh::InitFromScene ( const aiScene* pScene, const std::string& filename )
 {
-  m_entries.resize ( pScene->mNumMeshes );
+  m_entries.resize  ( pScene->mNumMeshes );
   m_textures.resize ( pScene->mNumMaterials );
 
-  // Initialize the meshes in the scene one by one
+  // Инициализируем меши один за другим
   for ( unsigned int i = 0; i < m_entries.size ( ); i++ ) 
   {
     const aiMesh* paiMesh = pScene->mMeshes[i];
