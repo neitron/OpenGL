@@ -38,7 +38,7 @@ static void IdleCB ( )
 static void InitCallbaks ( )
 {
   glutDisplayFunc         ( RenderSceneCB );
-  glutIdleFunc            ( RenderSceneCB );
+  glutIdleFunc            ( IdleCB );
   glutSpecialFunc         ( SpecialKeyboardCB );
   glutPassiveMotionFunc   ( PassiveMouseCB );
   glutKeyboardFunc        ( KeyboardCB );
@@ -47,7 +47,7 @@ static void InitCallbaks ( )
 void GLUTBackendInit ( int argc, char** argv )
 {
   glutInit ( &argc, argv );
-  glutInitDisplayMode ( GLUT_DOUBLE | GLUT_RGBA );
+  glutInitDisplayMode ( GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH );
 }
 
 bool GLUTBackendCreateWindow ( unsigned int width, unsigned int height, unsigned int bpp, bool isFullScreen, const char* pTitle )
@@ -89,14 +89,15 @@ void GLUTBackendRun ( ICallbacks* pCallbacks )
   glClearColor ( 0.1f, 0.1f, 0.1f, 1.0f );
   
   // Не рендерить то, что мы не видим
+  // тест глубины
+  glEnable ( GL_DEPTH_TEST );
   // сообщаем, что вершины подаются по часовой стрелке
   glFrontFace ( GL_CW );
   // не рендерь обратную сторону 
   glCullFace ( GL_BACK );
   // не рендерь не видные нам плоскости
   glEnable ( GL_CULL_FACE );
-  // тест глубины
-  //glEnable ( GL_DEPTH_TEST );
+  
 
   s_pCallbacks = pCallbacks;
   

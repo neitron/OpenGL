@@ -16,6 +16,7 @@
     <ClCompile Include="lighting_technique.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="math3d.cpp" />
+    <ClCompile Include="mesh.cpp" />
     <ClCompile Include="pipeline.cpp" />
     <ClCompile Include="technique.cpp" />
     <ClCompile Include="texture.cpp" />
@@ -26,6 +27,7 @@
     <ClInclude Include="glut_backend.h" />
     <ClInclude Include="lighting_technique.h" />
     <ClInclude Include="math3d.h" />
+    <ClInclude Include="mesh.h" />
     <ClInclude Include="pipeline.h" />
     <ClInclude Include="technique.h" />
     <ClInclude Include="texture.h" />
@@ -74,7 +76,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>D:\C++\SOIL\src;$(IncludePath)</IncludePath>
+    <IncludePath>D:\C++\LIBS\ASSIMP\assimp-3.1.1-win-binaries\include;D:\C++\LIBS\SOIL\src;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files\Assimp\bin\x64;C:\Program Files\Assimp\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>C:\Users\neitron\Desktop\Simple OpenGL Image Library\src;$(IncludePath)</IncludePath>
@@ -91,7 +94,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glew32.lib;glew32s.lib;glut32.lib;SOIL.lib</AdditionalDependencies>
+      <AdditionalDependencies>glew32.lib;glew32s.lib;glut32.lib;SOIL.lib;assimp.lib</AdditionalDependencies>
     </Link>
     <Bscmake>
       <PreserveSbr>true</PreserveSbr>

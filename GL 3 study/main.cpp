@@ -106,7 +106,7 @@ public:
   {
     m_pGameCamera->OnRender ( );
 
-    glClear ( GL_COLOR_BUFFER_BIT );
+    glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     m_Scale += 0.01;
 
@@ -396,7 +396,7 @@ int main(int argc, char** argv)
 
   delete pApp;
 
-
+  system ( "pause" );
   return 0;
 }
 

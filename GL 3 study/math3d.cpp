@@ -212,7 +212,7 @@ Quaternion operator*(const Quaternion& l, const Quaternion& r)
     return ret;
 }
 
-// Умножуние кватерниона на вектор
+// Умножeние кватерниона на вектор
 Quaternion operator*(const Quaternion& q, const Vector3f& v)
 {
     const float w = - (q.x * v.x) - (q.y * v.y) - (q.z * v.z);
