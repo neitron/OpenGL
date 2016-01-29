@@ -15,11 +15,11 @@ float Camera::STEP_SIZE_MOUSE ( 0.1f );  // MOUSE motion cam step
 
 
 Camera::Camera ( int wWidth, int wHeight ) :
-m_pos ( Vector3f ( 0.0f, 0.0f, 0.0f ) ),
-m_target ( Vector3f ( 0.0f, 0.0f, 1.0f ) ),
-m_up ( Vector3f ( 0.0f, 1.0f, 0.0f ) ),
-m_windowWidth ( wWidth ),
-m_windowHeight ( wHeight )
+  m_pos           ( Vector3f ( 0.0f, 0.0f, 0.0f ) ),
+  m_target        ( Vector3f ( 0.0f, 0.0f, 1.0f ) ),
+  m_up            ( Vector3f ( 0.0f, 1.0f, 0.0f ) ),
+  m_windowWidth   ( wWidth ),
+  m_windowHeight  ( wHeight )
 {
   m_target.Normalize ( );
 
@@ -27,11 +27,11 @@ m_windowHeight ( wHeight )
 };
 
 Camera::Camera ( int wWidth, int wHeight, const Vector3f& pos, const Vector3f& target, const Vector3f& up ) :
-m_pos ( pos ),
-m_target ( target ),
-m_up ( up ),
-m_windowWidth ( wWidth ),
-m_windowHeight ( wHeight )
+  m_pos           ( pos ),
+  m_target        ( target ),
+  m_up            ( up ),
+  m_windowWidth   ( wWidth ),
+  m_windowHeight  ( wHeight )
 {
   m_target.Normalize ( );
   m_up.Normalize ( );

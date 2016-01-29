@@ -1,6 +1,7 @@
 #version 330          
                 
-const int MAX_POINT_LIGHTS = 3;
+const int MAX_POINT_LIGHTS  = 3;
+const int MAX_SPOT_LIGHTS   = 2;
 
 in vec2 texCoord0;
 in vec3 normal0;
@@ -8,6 +9,7 @@ in vec3 worldPos0;
 
 out vec4 fragColor;
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 struct Attenuation                                                             
 {
   float constant;
@@ -15,6 +17,7 @@ struct Attenuation
   float expVar;
 };
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 struct BaseLight
 {
   float diffuseIntensity;
@@ -22,12 +25,14 @@ struct BaseLight
   vec3  color;
 };
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 struct DirectionalLight                                                             
 {
   BaseLight   base;
   vec3        direction;
 };
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 struct PointLight                                                             
 {
   BaseLight     base;
@@ -35,9 +40,22 @@ struct PointLight
   vec3		      position;
 };
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+struct SpotLight
+{
+      PointLight  base;
+      vec3        direction;
+      float       cutOff;    // cos of angle
+};
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+uniform SpotLight   gSpotLights [ MAX_SPOT_LIGHTS ];
+uniform int         gNumSpotLights;
 
 uniform PointLight			  gPointLights [ MAX_POINT_LIGHTS ];
 uniform int					      gNumPointLights;
+
 uniform DirectionalLight	gDirectionalLight;
 
 uniform sampler2D			gSampler;
@@ -62,7 +80,7 @@ vec4 CalcLightInternal ( BaseLight light, vec3 lightDirection, vec3 normal )
     diffuseColor = vec4 ( light.color, 1.0f ) * light.diffuseIntensity * diffuseFactor;
 
     vec3  vertexToEye     = normalize ( gEyeWorldPos - worldPos0 );
-    vec3  lightReflect    = normalize ( reflect ( lightDirection, normal ) ); // получаем вектор отраженного света
+    vec3  lightReflect    = normalize ( reflect ( lightDirection, normal ) ); // get normalize reflect light vector
     float specularFactor  = dot ( vertexToEye, lightReflect );
 
     specularFactor = pow ( specularFactor, gSpecularPower );
@@ -87,22 +105,42 @@ vec4 CalcDirectionalLight ( vec3 normal )
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-vec4 CalcPointLight ( int index, vec3 normal )
+vec4 CalcPointLight ( PointLight pointLight, vec3 normal )
 {
-    vec3  lightDirection = worldPos0 - gPointLights[ index ].position;
-    float distanceVar = length ( lightDirection );
-    lightDirection = normalize ( lightDirection );
+     vec3 lightDirection = worldPos0 - pointLight.position;
+     float distanceVar = length ( lightDirection );
+     lightDirection = normalize ( lightDirection );
  
-    vec4  color = CalcLightInternal ( gPointLights[ index ].base, lightDirection, normal);
-    
-    float attenuation =  
-                  gPointLights[ index ].atten.constant +
-                  gPointLights[ index ].atten.linear * distanceVar +
-                  gPointLights[ index ].atten.expVar * distanceVar * distanceVar;
+     vec4 color = CalcLightInternal ( pointLight.base, lightDirection, normal);
+     
+     float attenuation =  pointLight.atten.constant +
+                          pointLight.atten.linear * distanceVar +
+                          pointLight.atten.expVar * distanceVar * distanceVar;
  
-    return color / attenuation;
+     return color / attenuation;
 }
-			       
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+vec4 CalcSpotLight ( SpotLight sLight, vec3 normal )
+{
+      vec3 lightToPixel = normalize ( worldPos0 - sLight.base.position);
+      float spotFactor = dot ( lightToPixel, sLight.direction );
+ 
+      if ( spotFactor > sLight.cutOff ) 
+      {
+        vec4 color = CalcPointLight ( sLight.base, normal);
+        
+        return 
+          color * ( 1.0f - ( 1.0f - spotFactor ) * 1.0f / ( 1.0f - sLight.cutOff ) );
+      }
+      else 
+      {
+        return vec4 ( 0.0f, 0.0f, 0.0f, 0.0f );
+      }
+}
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -120,9 +158,14 @@ void main ( void )
 
   vec4 totalLight = CalcDirectionalLight ( normal );
   
-  for ( int index = 0; index < gNumPointLights; index++ ) 
+  for ( int i = 0; i < gNumPointLights; i++ ) 
   {
-    totalLight += CalcPointLight ( index, normal );
+    totalLight += CalcPointLight ( gPointLights[ i ], normal );
+  }
+
+  for ( int i = 0 ; i < gNumSpotLights; i++ ) 
+  {
+    totalLight += CalcSpotLight ( gSpotLights[ i ], normal );
   }
   
   fragColor = texture2D ( gSampler, texCoord0 ) * totalLight;

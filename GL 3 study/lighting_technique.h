@@ -6,8 +6,12 @@
 #include "technique.h"
 #include "math3d.h"
 
-const unsigned int MAX_POINT_LIGHTS = 3u; // Максимальное количество источников света
+const unsigned int MAX_POINT_LIGHTS = 3u; // Максимальное количество источников точесного света
+const unsigned int MAX_SPOT_LIGHTS  = 2u; // Максимальное количество источников прожекторного света
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Base light for diferent sourse
 struct BaseLight
 {
   Vector3f  color;            // Цвет света
@@ -21,6 +25,9 @@ struct BaseLight
   { }
 };
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Direction light
 struct DirectionLight : BaseLight
 {
   Vector3f  direction;  // направление освещения (от направленого света)
@@ -30,6 +37,9 @@ struct DirectionLight : BaseLight
   { }
 };
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Point light
 struct PointLight : BaseLight
 {
   Vector3f  position;
@@ -51,6 +61,21 @@ struct PointLight : BaseLight
   }
 };
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Spot light
+struct SpotLight : public PointLight
+{
+  Vector3f  direction;
+  float     cutOff;    // Область отсечения, максимальный угол между направлением света и вектором до пикселей, которые еще попадут под влияние света
+
+  SpotLight ( ) :
+    direction   ( Vector3f ( 0.0f, 0.0f, 0.0f ) ),
+    cutOff      (0.0f)
+  { }
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class LightingTechnique : public Technique
 {
 public:
@@ -83,6 +108,10 @@ public:
   // Устанавливает несколько источников света
   void SetPointLights ( unsigned int numLights, const PointLight* pLights );
 
+  // Прожекторный свет:
+  // Устанавливает несколько источников света
+  void LightingTechnique::SetSpotLights ( unsigned int numLights, const SpotLight* pLights );
+  
 private:
 
   // Расположения Юниформ (далее Ю) в шейдерах:
@@ -98,21 +127,18 @@ private:
   GLuint m_eyeWorldPosLocation;           // Ю-позиция зритель
   GLuint m_matSpecularIntensityLocation;  // Ю-позиция интенсивности отражения
   GLuint m_matSpecularPowerLocation;      // Ю-позиция степени отражения материала
-                              
-  GLuint m_numPointLightsLocation; // Ю-позиция семплера текстуры
 
   // 3 Направленного света
-
   struct 
   {
     GLuint color;
     GLuint ambientIntensity;
     GLuint direction;
     GLuint diffuseIntensity;
+
   } m_dirLightLocation; // Ю-позиция направленного источника света
 
   // 4 Точечного света
-
   struct 
   {
     GLuint color;
@@ -128,6 +154,30 @@ private:
     } atten;
 
   } m_pointLightsLocation[MAX_POINT_LIGHTS]; // Массив Ю-позиций источников точечного света
+
+  GLuint m_numPointLightsLocation; // Ю-позиция количество точечных источников света
+
+  // 5 Прожекторного света
+  struct 
+  {
+    GLuint color;
+    GLuint ambientIntensity;
+    GLuint diffuseIntensity;
+    GLuint position;
+    GLuint direction;
+    GLuint cutOff;
+    
+    struct
+    {
+      GLuint constant;
+      GLuint linear;
+      GLuint exp;
+    } atten;
+
+  } m_spotLightsLocation[MAX_SPOT_LIGHTS]; // Массив Ю-позиций источников прожекторного света
+
+  GLuint m_numSpotLightsLocation; // Ю-позиция количество прожекторных источников света
+
 };
 
 #endif /* LIGHTINGTECHNIQUE_H */

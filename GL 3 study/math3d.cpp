@@ -13,7 +13,7 @@ Vector3f::Vector3f(const Vector3f &v)
 
 // Возвращает вектор, перпендикулярный плоскости, 
 // определяемой исходными векторами
-Vector3f Vector3f::Cross(const Vector3f& v) const
+Vector3f Vector3f::Cross ( const Vector3f& v ) const
 {
   Vector3f temp(
     y * v.z - z * v.y,

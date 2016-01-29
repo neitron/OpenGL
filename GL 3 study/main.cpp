@@ -43,7 +43,7 @@ public:
     m_pTexture          ( nullptr ),
     m_pEffect           ( nullptr ),
     m_Scale             ( 0.0f ),
-    m_specularPower     ( 16.0f ),
+    m_specularPower     ( 32.0f ),
     m_specularIntensity ( 1.0f )
   {
     m_directionalLight.color            = Vector3f ( 1.0f, 1.0f, 1.0f );
@@ -61,17 +61,15 @@ public:
 
   bool Init ( )
   {
-    Vector3f pos    ( 0.0f, 0.0f, -3.0f );
-    Vector3f target ( 0.0f, 0.0f, 1.0f );
+    Vector3f pos    ( -10.0f, 0.0f, -10.0f );
+    Vector3f target ( 1.0f, 0.0f, 1.0f );
     Vector3f up     ( 0.0, 1.0f, 0.0f );
 
     m_pGameCamera = new Camera ( WINDOW_WIDTH, WINDOW_HEIGHT, pos, target, up );
 
     unsigned int indices[] = {
-                                 0, 3, 1,
-                                 1, 3, 2,
-                                 2, 3, 0,
-                                 1, 2, 0
+                                 0, 2, 1,
+                                 0, 3, 2
                              };
 
     CreateIndexBuffer ( indices, sizeof ( indices ) );
@@ -133,7 +131,9 @@ public:
     m_pEffect->SetMatSpecularIntensity ( m_specularIntensity );
     m_pEffect->SetMatSpecularPower ( m_specularPower );
 
-    // Точечный свет
+
+    #pragma region Точечный свет
+
     const int COUNT_OF_POINT_LIGHTS = 3;
     PointLight pl[COUNT_OF_POINT_LIGHTS];
 
@@ -152,7 +152,32 @@ public:
     pl[2].position = Vector3f ( sinf ( m_Scale + 4.2f ) * 10, 1.0f, cosf ( m_Scale + 4.2f ) * 10 );
     pl[2].attenuation.linear = 0.1f;
 
-    m_pEffect->SetPointLights ( COUNT_OF_POINT_LIGHTS, pl );
+    //m_pEffect->SetPointLights ( COUNT_OF_POINT_LIGHTS, pl );
+
+    #pragma endregion
+    
+    #pragma region Прожекторный свет
+
+    const int COUNT_OF_SPOT_LIGHTS = 2;
+    SpotLight sl[COUNT_OF_SPOT_LIGHTS];
+
+    sl[0].diffuseIntensity = 15.0f;
+    sl[0].color = Vector3f ( 1.0f, 1.0f, 0.7f );
+    sl[0].position = Vector3f ( -0.0f, -1.9f, -0.0f );
+    sl[0].direction = Vector3f ( sinf ( m_Scale ), 0.0f, cosf ( m_Scale ) );
+    sl[0].attenuation.linear = 0.1f;
+    sl[0].cutOff = 20.0f;
+
+    sl[1].diffuseIntensity = 5.0f;
+    sl[1].color = Vector3f ( 0.0f, 1.0f, 1.0f );
+    sl[1].position = m_pGameCamera->GetPos ( );
+    sl[1].direction = m_pGameCamera->GetTarget ( );
+    sl[1].attenuation.linear = 0.1f;
+    sl[1].cutOff = 10.0f;
+
+    m_pEffect->SetSpotLights ( COUNT_OF_SPOT_LIGHTS, sl );
+
+    #pragma endregion
 
 
     // Подключаем атрибут (так же как и в вершинном шейдере)
@@ -160,8 +185,6 @@ public:
     glEnableVertexAttribArray ( 0 );
     glEnableVertexAttribArray ( 1 );
     glEnableVertexAttribArray ( 2 );
-
-
 
     // Активный буфер
     glBindBuffer ( GL_ARRAY_BUFFER, m_VBO );
@@ -184,7 +207,7 @@ public:
     m_pTexture->Bind ( GL_TEXTURE0 );
 
     // Рисуем что либо
-    glDrawElements ( GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0 );
+    glDrawElements ( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0 );
 
     // Отключаем атрибуты
     glDisableVertexAttribArray ( 0 );
@@ -264,10 +287,10 @@ private:
   void CreateVertexBuffer ( const unsigned int* pIndices, unsigned int indexCount )
   {
     // 3 vertices
-    Vertex vertices[4] = {  Vertex ( Vector3f ( -1.0f, -1.0f, 0.5773f ),  Vector2f ( 0.0f, 0.0f ) ),    //Vector2f ( 0.0f, 0.0f )
-                            Vertex ( Vector3f ( 0.0f, -1.0f, -1.15475 ),  Vector2f ( 1.0f, 0.0f ) ),    //Vector2f ( 0.5f, 0.0f )
-                            Vertex ( Vector3f ( 1.0f, -1.0f, 0.5773f ),   Vector2f ( 2.0f, 0.0f ) ),    //Vector2f ( 1.0f, 0.0f )
-                            Vertex ( Vector3f ( 0.0f, 1.0f, 0.0f ),       Vector2f ( 1.0f, 2.0f ) ) };  //Vector2f ( 0.5f, 1.0f )
+    Vertex vertices[4] = {  Vertex ( Vector3f ( -10.0f, -2.0f, -10.0f ),    Vector2f ( 0.0f, 0.0f ) ),    //Vector2f ( 0.0f, 0.0f )
+                            Vertex ( Vector3f (  10.0f, -2.0f, -10.0f ),    Vector2f ( 2.0f, 0.0f ) ),    //Vector2f ( 0.5f, 0.0f )
+                            Vertex ( Vector3f (  10.0f, -2.0f,  10.0f ),    Vector2f ( 2.0f, 2.0f ) ),    //Vector2f ( 1.0f, 0.0f )
+                            Vertex ( Vector3f ( -10.0f, -2.0f,  10.0f ),    Vector2f ( 0.0f, 2.0f ) ) };  //Vector2f ( 0.5f, 1.0f )
 
     unsigned int vertexCount = ARRAY_SIZE_IN_ELEMENTS ( vertices );
 
