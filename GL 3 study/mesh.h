@@ -7,7 +7,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include <map>
+
 #include <vector>
 #include <GL/glew.h>
 
@@ -16,6 +16,10 @@
 #include "texture.h"
 
 const unsigned int INVALID_MATERIAL = 0xFFFFFFFF;
+
+
+
+
 
 struct Vertex
 {
@@ -32,6 +36,10 @@ struct Vertex
     m_normal = normal;
   }
 };
+
+
+
+
 
 class Mesh
 {

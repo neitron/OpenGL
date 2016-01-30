@@ -96,11 +96,12 @@ void Mesh::InitMesh ( unsigned int index, const aiMesh* paiMesh )
   std::vector<unsigned int> indices;
 
   const aiVector3D zero3D ( 0.0f, 0.0f, 0.0f );
+  const aiVector3D normal3D ( 1.0f, 1.0f, 1.0f );
 
   for ( unsigned int i = 0; i < paiMesh->mNumVertices; i++ )
   {
     const aiVector3D* pPos = &( paiMesh->mVertices[i] );
-    const aiVector3D* pNormal = &( paiMesh->mNormals[i] );
+    const aiVector3D* pNormal = paiMesh->HasNormals ( ) ? &( paiMesh->mNormals[i] ) : &normal3D; 
     const aiVector3D* pTexCoord = paiMesh->HasTextureCoords ( 0 ) ? &( paiMesh->mTextureCoords[0][i] ) : &zero3D;
 
     Vertex v ( 

@@ -110,7 +110,7 @@ public:
 
   // Прожекторный свет:
   // Устанавливает несколько источников света
-  void LightingTechnique::SetSpotLights ( unsigned int numLights, const SpotLight* pLights );
+  void SetSpotLights ( unsigned int numLights, const SpotLight* pLights );
   
 private:
 
