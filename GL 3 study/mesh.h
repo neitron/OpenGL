@@ -15,7 +15,7 @@
 #include "math3d.h"
 #include "texture.h"
 
-const unsigned int INVALID_MATERIAL = 0xFFFFFFFF;
+
 
 
 
@@ -75,8 +75,15 @@ private:
     unsigned int materialIndex;
   };
 
+  static const unsigned int INVALID_MATERIAL = 0xFFFFFFFF;
+
   std::vector<MeshEntry>  m_entries;
   std::vector<Texture*>   m_textures;
+
+  enum VertexAtribLocation
+  {
+    POSITIONS, TEXTURE_COORDS, NORMALS 
+  };
 };
 
 

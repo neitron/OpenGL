@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cassert>
+
 #include "mesh.h"
 
 Mesh::MeshEntry::MeshEntry ( )
@@ -28,12 +30,17 @@ bool Mesh::MeshEntry::Init ( const std::vector<Vertex>& vertices, const std::vec
 {
   numIndices = indices.size ( );
 
-  glGenBuffers ( 1, &VB );
-  glBindBuffer ( GL_ARRAY_BUFFER, VB );
-  glBufferData ( GL_ARRAY_BUFFER, sizeof ( Vertex )*vertices.size ( ), &vertices[0], GL_STATIC_DRAW );
+  glGenBuffers ( 1, &VB );              // создаем один и получаем на него указатель-идентификатор
+  glBindBuffer ( GL_ARRAY_BUFFER, VB ); // делаем его активным как буфер вершин
+  /* передать вершинные атрибуты из оперативной памяти в видеопамять (пустые)
+     0: мы все еще работаем с буфером вершин
+     1: размер данного буфера в байтах
+     2: указатель да данные Загружаемые в буфер
+     3: указывает GPU как часто содержимое данного буфера будет обновляться */
+  glBufferData ( GL_ARRAY_BUFFER, sizeof ( Vertex ) * vertices.size ( ), &vertices[0], GL_STATIC_DRAW );                      
 
-  glGenBuffers ( 1, &IB );
-  glBindBuffer ( GL_ELEMENT_ARRAY_BUFFER, IB );
+  glGenBuffers ( 1, &IB ); // создаем еще один и получаем на него указатель-идентификатор
+  glBindBuffer ( GL_ELEMENT_ARRAY_BUFFER, IB ); // делаем его активным как буфер индексов
   glBufferData ( GL_ELEMENT_ARRAY_BUFFER, sizeof ( unsigned int )*numIndices, &indices[0], GL_STATIC_DRAW );
 
   return true;
@@ -43,7 +50,7 @@ void Mesh::Clear ( )
 {
   for ( unsigned int i = 0; i < m_textures.size ( ); i++ )
   {
-    SAFE_DELETE ( m_textures[i] );
+    SafeDelete ( m_textures[i] );
   }
 }
 
@@ -104,20 +111,20 @@ void Mesh::InitMesh ( unsigned int index, const aiMesh* paiMesh )
     const aiVector3D* pNormal = paiMesh->HasNormals ( ) ? &( paiMesh->mNormals[i] ) : &normal3D; 
     const aiVector3D* pTexCoord = paiMesh->HasTextureCoords ( 0 ) ? &( paiMesh->mTextureCoords[0][i] ) : &zero3D;
 
-    Vertex v ( 
-      Vector3f ( pPos->x, pPos->y, pPos->z ),
-      Vector2f ( pTexCoord->x, pTexCoord->y ),
-      Vector3f ( pNormal->x, pNormal->y, pNormal->z ) 
-      );
+    Vertex v (  Vector3f ( pPos->x, pPos->y, pPos->z ),
+                Vector2f ( pTexCoord->x, pTexCoord->y ),
+                Vector3f ( pNormal->x, pNormal->y, pNormal->z ) );
 
     vertices.push_back ( v );
   }
 
-  for ( unsigned int i = 0; i < paiMesh->mNumFaces; i++ )
+  for ( unsigned int i = 0; i < paiMesh->mNumFaces && paiMesh->mFaces != nullptr; i++ )
   {
     const aiFace& Face = paiMesh->mFaces[i];
-    assert ( Face.mNumIndices == 3 );
-    indices.push_back ( Face.mIndices[0] );
+    
+	assert ( Face.mNumIndices == 3 );
+    
+	indices.push_back ( Face.mIndices[0] );
     indices.push_back ( Face.mIndices[1] );
     indices.push_back ( Face.mIndices[2] );
   }
@@ -173,11 +180,11 @@ bool Mesh::InitMaterials ( const aiScene* pScene, const std::string& filename )
     }
 
     // Загружаем белую текстуру если модель не имеет собственной
-    if ( !m_textures[i] )
+    /*if ( !m_textures[i] )
     {
       m_textures[i] = new Texture ( GL_TEXTURE_2D, "../Content/white.png" );
       ret = m_textures[i]->Load ( );
-    }
+    }*/
   }
 
   return ret;
@@ -185,31 +192,46 @@ bool Mesh::InitMaterials ( const aiScene* pScene, const std::string& filename )
 
 void Mesh::Render ( )
 {
-  glEnableVertexAttribArray ( 0 );
-  glEnableVertexAttribArray ( 1 );
-  glEnableVertexAttribArray ( 2 );
+  // Задействуем атрибуты шейдера
+  glEnableVertexAttribArray ( VertexAtribLocation::POSITIONS      );
+  glEnableVertexAttribArray ( VertexAtribLocation::TEXTURE_COORDS );
+  glEnableVertexAttribArray ( VertexAtribLocation::NORMALS        );
+  /* Так как в шейдере у нас соответствующие атрибуты с их локациями
+    layout ( location = 0 ) in vec3 position;	         
+    layout ( location = 1 ) in vec2 texCoord;
+    layout ( location = 2 ) in vec3 normal;   */
 
-  for ( unsigned int i = 0; i < m_entries.size ( ); i++ )
+  const int VERTEX_BYTE_SIZE = sizeof ( Vertex );
+
+  for ( auto& entry : m_entries )
   {
-    glBindBuffer ( GL_ARRAY_BUFFER, m_entries[i].VB );
+    glBindBuffer ( GL_ARRAY_BUFFER, entry.VB ); // делаем его активным как буфер вершин
 
-    glVertexAttribPointer ( 0, 3, GL_FLOAT, GL_FALSE, sizeof ( Vertex ), 0 );
-    glVertexAttribPointer ( 1, 3, GL_FLOAT, GL_FALSE, sizeof ( Vertex ), ( const GLvoid* ) 12 );
-    glVertexAttribPointer ( 2, 3, GL_FLOAT, GL_FALSE, sizeof ( Vertex ), ( const GLvoid* ) 20 );
+    // Как конвейеру воспринимать данные буфера (каждый атрибут в отдельности)
+    // 1: номер(адрес в шейдере) атрибута (атрибут позиции, цвета или текстуры)
+    // 2: количество компонент в атрибуте (x y z) = 3
+    // 3: тип каждого компонента (x: float)
+    // 4: нормализировать атрибуты или нет
+    // 5: число байтов между 2 атрибутами (одного типа)
+    // 6: смещение в структуре (с какой позиции начинаются данные даного атрибута)
+    glVertexAttribPointer ( VertexAtribLocation::POSITIONS,       3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE, 0 );
+    glVertexAttribPointer ( VertexAtribLocation::TEXTURE_COORDS,  3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE, ( const GLvoid* ) 12 );
+    glVertexAttribPointer ( VertexAtribLocation::NORMALS,         3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE, ( const GLvoid* ) 20 );
 
-    glBindBuffer ( GL_ELEMENT_ARRAY_BUFFER, m_entries[i].IB );
+    glBindBuffer ( GL_ELEMENT_ARRAY_BUFFER, entry.IB ); // делаем его активным как буфер индексов
 
-    const unsigned int materialIndex = m_entries[i].materialIndex;
+    const unsigned int MATERIAL_INDEX = entry.materialIndex;
 
-    if ( materialIndex < m_textures.size ( ) && m_textures[ materialIndex ] )
+    if ( MATERIAL_INDEX < m_textures.size ( ) && m_textures[MATERIAL_INDEX] )
     {
-      m_textures[ materialIndex ]->Bind ( GL_TEXTURE0 );
+      m_textures[MATERIAL_INDEX]->Bind ( GL_TEXTURE0 );
     }
 
-    glDrawElements ( GL_TRIANGLES, m_entries[i].numIndices, GL_UNSIGNED_INT, 0 );
+    // рисуется как сообщение треугольников, по индексам, до максимума вершин по количеству
+    glDrawElements ( GL_TRIANGLES, entry.numIndices, GL_UNSIGNED_INT, 0 );
   }
 
-  glDisableVertexAttribArray ( 2 );
-  glDisableVertexAttribArray ( 1 );
-  glDisableVertexAttribArray ( 0 );
+  glDisableVertexAttribArray ( VertexAtribLocation::POSITIONS       );
+  glDisableVertexAttribArray ( VertexAtribLocation::TEXTURE_COORDS  );
+  glDisableVertexAttribArray ( VertexAtribLocation::NORMALS         );
 }

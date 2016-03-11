@@ -17,10 +17,11 @@ public:
 
   virtual bool Init ( );
 
-  void Eneble ( );
+  void Enable ( );
 
 protected:
 
+  bool LoadShaderTextFile ( const char* pFilename, char* &pShaderText );
   bool AddShader ( GLenum shaderType, const char* pShaderText );
   bool Finalize ( );
 

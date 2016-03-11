@@ -13,11 +13,14 @@
 #include "lighting_technique.h"
 #include "utils.h"
 #include "mesh.h"
+#include "shadow_map_fbo.h"
+#include "shadow_map_technique.h"
+
 
 
 const int WINDOW_WIDTH    = 1300;
 const int WINDOW_HEIGHT   = 700;
-const int TEST = 0;
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class Main : public ICallbacks
@@ -28,31 +31,44 @@ public:
   Main ( ) :
     m_pGameCamera       ( nullptr ),
     m_pMesh             ( nullptr ),
+    m_pQuad             ( nullptr ),
     m_pEffect           ( nullptr ),
+    m_pShadowMapTech    ( nullptr ),
     m_Scale             ( 0.0f ),
     m_specularPower     ( 0.0f ),
     m_specularIntensity ( 0.0f )
   {
-    m_directionalLight.color            = Vector3f ( 1.0f, 1.0f, 1.0f );
+    m_directionalLight.color            = Vector3f ( 1.0f );
     m_directionalLight.ambientIntensity = 1.0f;
     m_directionalLight.diffuseIntensity = 0.1f;
     m_directionalLight.direction        = Vector3f ( 1.0f, 0.0, 1.0 );
+  
+    m_spotLight.ambientIntensity = 0.0f;
+    m_spotLight.diffuseIntensity = 0.9f;
+    m_spotLight.color = Vector3f ( 1.0 );
+    m_spotLight.attenuation.linear = 0.01f;
+    m_spotLight.position = Vector3f ( -20.0f, 20.0f, 5.0f );
+    m_spotLight.direction = Vector3f ( 1.0f, -1.0f, 0.0f );
+    m_spotLight.cutOff = 20.0f;
   }
 
   ~Main ( )
   {
-    delete m_pGameCamera;
-    delete m_pEffect;
-    delete m_pMesh;
+    SafeDelete ( m_pGameCamera );
+    SafeDelete ( m_pEffect );
+    SafeDelete ( m_pMesh );
+    SafeDelete ( m_pQuad );
+    SafeDelete ( m_pShadowMapTech );
   }
 
   bool Init ( )
   {
-    Vector3f pos    ( -10.0f, 4.0f, 0.0f );
-    Vector3f target ( 1.0f, 0.0f, 1.0f );
-    Vector3f up     ( 0.0, 1.0f, 0.0f );
+    if ( !m_shadowMapFBO.Init ( WINDOW_WIDTH, WINDOW_HEIGHT ) ) 
+    {
+      return false;
+    }
 
-    m_pGameCamera = new Camera ( WINDOW_WIDTH, WINDOW_HEIGHT, pos, target, up );
+    m_pGameCamera = new Camera ( WINDOW_WIDTH, WINDOW_HEIGHT );
 
     m_pEffect = new LightingTechnique ( );
 
@@ -62,13 +78,26 @@ public:
       return false;
     }
 
-    m_pEffect->Eneble ( );
+    m_pShadowMapTech = new ShadowMapTechnique ( );
 
-    m_pEffect->SetTextureUnit ( 0 );
+    if ( !m_pShadowMapTech->Init ( ) ) 
+    {
+      printf ( "Error initializing the shadow map technique\n" );
+      return false;
+    }
+
+    //m_pEffect->SetTextureUnit ( 0 );
+
+    m_pQuad = new Mesh ( );
+
+    if ( !m_pQuad->LoadMesh ( "Content/quad.obj" ) ) 
+    {
+      return false;
+    }
 
     m_pMesh = new Mesh ( );
 
-    return m_pMesh->LoadMesh ( "Content/phoenix_ugv.md2" ); //knight.x   phoenix_ugv.md2
+    return m_pMesh->LoadMesh ( "Content/ship/phoenix_ugv.md2" ); //knight.x   phoenix_ugv.md2
   }
 
   void Run ( )
@@ -79,85 +108,55 @@ public:
   virtual void RenderSceneCB ( )
   {
     m_pGameCamera->OnRender ( );
+    m_Scale += 0.05f;
 
-    glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-    m_Scale += 0.01;
-
-    float scale = 0.1f;
-    // Конвеер для создания матрици трасформаций
-    Pipeline p;
-    p.Scale ( scale, scale, scale );
-    p.Rotate ( 0.0f, m_Scale, 0.0f );
-    p.WorldPos ( 0.0f, 0.0f, 10.0f );
-    p.SetCamera ( m_pGameCamera->GetPos ( ), m_pGameCamera->GetTarget ( ), m_pGameCamera->GetUp ( ) );
-    p.SetPerspectiveProj ( 60.0f, WINDOW_WIDTH, WINDOW_HEIGHT, 1.0f, 100.0f );
-
-    // Матрици трансформаций
-    m_pEffect->SetWVP ( p.GetWVPTrans ( ) );
-    m_pEffect->SetWorldMatrix ( p.GetWorldTrans ( ) );
-    
-    // Направленный свет
-    m_pEffect->SetDirectionalLight ( m_directionalLight );
-
-    // Отраженный свет
-    m_pEffect->SetEyeWorldPos ( m_pGameCamera->GetPos ( ) );
-    m_pEffect->SetMatSpecularIntensity ( m_specularIntensity );
-    m_pEffect->SetMatSpecularPower ( m_specularPower );
-
-
-    #pragma region Точечный свет
-
-    const int COUNT_OF_POINT_LIGHTS = 3;
-    PointLight pl[COUNT_OF_POINT_LIGHTS];
-
-    pl[0].diffuseIntensity = 0.5f;
-    pl[0].color = Vector3f ( 1.0f, 0.0f, 0.0f );
-    pl[0].position = Vector3f ( sinf ( m_Scale ) * 10, 1.0f, cosf ( m_Scale ) * 10 );
-    pl[0].attenuation.linear = 0.1f;
-
-    pl[1].diffuseIntensity = 0.5f;
-    pl[1].color = Vector3f ( 0.0f, 1.0f, 0.0f );
-    pl[1].position = Vector3f ( sinf ( m_Scale + 2.1f ) * 10, 1.0f, cosf ( m_Scale + 2.1f ) * 10 );
-    pl[1].attenuation.linear = 0.1f;
-
-    pl[2].diffuseIntensity = 0.5f;
-    pl[2].color = Vector3f ( 0.0f, 0.0f, 1.0f );
-    pl[2].position = Vector3f ( sinf ( m_Scale + 4.2f ) * 10, 1.0f, cosf ( m_Scale + 4.2f ) * 10 );
-    pl[2].attenuation.linear = 0.1f;
-
-    //m_pEffect->SetPointLights ( COUNT_OF_POINT_LIGHTS, pl );
-
-    #pragma endregion
-    
-    #pragma region Прожекторный свет
-
-    const int COUNT_OF_SPOT_LIGHTS = 2;
-    SpotLight sl[COUNT_OF_SPOT_LIGHTS];
-
-    sl[0].diffuseIntensity = 15.0f;
-    sl[0].color = Vector3f ( 1.0f, 1.0f, 0.7f );
-    sl[0].position = Vector3f ( -0.0f, -1.9f, -0.0f );
-    sl[0].direction = Vector3f ( sinf ( m_Scale ), 0.0f, cosf ( m_Scale ) );
-    sl[0].attenuation.linear = 0.1f;
-    sl[0].cutOff = 20.0f;
-
-    sl[1].diffuseIntensity = 5.0f;
-    sl[1].color = Vector3f ( 0.0f, 1.0f, 1.0f );
-    sl[1].position = m_pGameCamera->GetPos ( );
-    sl[1].direction = m_pGameCamera->GetTarget ( );
-    sl[1].attenuation.linear = 0.1f;
-    sl[1].cutOff = 10.0f;
-
-    //m_pEffect->SetSpotLights ( COUNT_OF_SPOT_LIGHTS, sl );
-
-    #pragma endregion
-    
-    m_pMesh->Render ( );
+    ShadowMapPass ( );
+    RenderPass ( );
 
     glutSwapBuffers ( );
   }
 
+  virtual void ShadowMapPass ( )
+  {
+    m_shadowMapFBO.BindForWriting ( );
+
+    glClear ( GL_DEPTH_BUFFER_BIT );
+    
+    m_pShadowMapTech->Enable ( );
+    
+    Pipeline p;
+    p.Scale ( 0.2f, 0.2f, 0.2f );
+    p.Rotate ( 0.0f, m_Scale, 0.0f );
+    p.WorldPos ( 0.0f, 0.0f, 5.0f );
+    p.SetCamera ( m_spotLight.position, m_spotLight.direction, Vector3f ( 0.0f, 1.0f, 0.0f ) );
+    p.SetPerspectiveProj ( 60.0f, WINDOW_WIDTH, WINDOW_HEIGHT, 1.0f, 50.0f );
+
+    m_pShadowMapTech->SetWVP ( p.GetWVPTrans ( ) );
+    m_pMesh->Render ( );
+
+    glBindFramebuffer ( GL_FRAMEBUFFER, 0 );
+  }
+
+  virtual void RenderPass ( )
+  {
+    glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    
+    //m_pEffect->Enable ( );
+
+    m_pShadowMapTech->SetTextureUnit ( 0 );
+    m_shadowMapFBO.BindForReading ( GL_TEXTURE0 );
+
+    Pipeline p;
+    p.Scale ( 5.0f, 5.0f, 5.0f );
+    p.WorldPos ( 0.0f, 0.0f, 10.0f );
+    p.SetCamera ( m_pGameCamera->GetPos ( ), m_pGameCamera->GetTarget ( ), m_pGameCamera->GetUp ( ) );
+    p.SetPerspectiveProj ( 60.0f, WINDOW_WIDTH, WINDOW_HEIGHT, 1.0f, 50.0f );
+    
+    m_pShadowMapTech->SetWVP ( p.GetWVPTrans ( ) );
+    
+    m_pQuad->Render ( );
+  }
+  
   virtual void IdleCB ( )
   {
     RenderSceneCB ( );
@@ -225,15 +224,17 @@ public:
 
 private:
 
-  GLuint    m_VBO; // переменная для хранения указателя на буфер вершин
-  GLuint    m_IBO;
-
   Camera*   m_pGameCamera;
 
   Mesh*     m_pMesh;
+  Mesh*     m_pQuad;
 
   LightingTechnique* m_pEffect;
   DirectionLight m_directionalLight;
+
+  ShadowMapFBO m_shadowMapFBO;
+  SpotLight m_spotLight;
+  ShadowMapTechnique* m_pShadowMapTech;
 
   float m_specularPower;
   float m_specularIntensity;

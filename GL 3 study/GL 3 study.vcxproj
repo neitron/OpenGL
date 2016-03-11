@@ -18,6 +18,8 @@
     <ClCompile Include="math3d.cpp" />
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="pipeline.cpp" />
+    <ClCompile Include="shadow_map_fbo.cpp" />
+    <ClCompile Include="shadow_map_technique.cpp" />
     <ClCompile Include="technique.cpp" />
     <ClCompile Include="texture.cpp" />
   </ItemGroup>
@@ -29,6 +31,8 @@
     <ClInclude Include="math3d.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="pipeline.h" />
+    <ClInclude Include="shadow_map_fbo.h" />
+    <ClInclude Include="shadow_map_technique.h" />
     <ClInclude Include="technique.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="utils.h" />
@@ -36,8 +40,10 @@
   <ItemGroup>
     <None Include="FS.glsl" />
     <None Include="FS_Fail.glsl" />
+    <None Include="FS_shadow_map.glsl" />
     <None Include="temp.glsl" />
     <None Include="VS.glsl" />
+    <None Include="VS_shadow_map.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

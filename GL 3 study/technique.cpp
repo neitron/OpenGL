@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <iostream>
+#include <fstream>
 
 #include "technique.h"
 #include "utils.h"
@@ -33,6 +35,35 @@ bool Technique::Init ( )
     fprintf ( stderr, "Error creating shader program\n" );
     return false;
   }
+
+  return true;
+}
+
+bool Technique::LoadShaderTextFile ( const char* pFilename, char* &pShaderText )
+{
+  if ( pShaderText )
+  {
+    SafeDelete ( pShaderText );
+  }
+
+  std::ifstream is ( pFilename, std::ios::in | std::ios::binary | std::ios::ate );
+
+  if ( !is.is_open ( ) )
+  {
+    std::cerr << "Unable to open file " << pFilename << std::endl;
+    return false;
+  }
+
+  long size = ( long ) is.tellg ( );
+  pShaderText = new char[size + 1];
+
+  is.seekg ( 0, std::ios::beg );
+  is.read ( pShaderText, size );
+  is.close ( );
+
+  pShaderText[size] = 0;
+
+  std::cout << pShaderText << std::endl << std::endl;
 
   return true;
 }
@@ -122,7 +153,7 @@ bool Technique::Finalize ( )
   return true;
 }
 
-void Technique::Eneble ( )
+void Technique::Enable ( )
 {
   glUseProgram ( m_shaderProgram );
 }

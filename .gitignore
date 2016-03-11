@@ -154,3 +154,13 @@ $RECYCLE.BIN/
 
 # Mac desktop service store files
 .DS_Store
+
+# =========================
+# Projects toolses
+# =========================
+
+# Assimp and SOIL
+Tools/
+
+# GL, Glew, Glut files
+GL Files/

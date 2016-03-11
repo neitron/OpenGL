@@ -81,7 +81,7 @@ void GLUTBackendRun ( ICallbacks* pCallbacks )
 {
   if ( !pCallbacks )
   {
-    fprintf ( stderr, "%s : callbacks not specified!\n", __FUNCTIONW__ );
+    fprintf ( stderr, "%s : callbacks not specified!\n", reinterpret_cast<char*> ( __FUNCTIONW__ ) );
     return;
   }
 

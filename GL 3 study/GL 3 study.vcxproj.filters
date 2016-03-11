@@ -75,6 +75,12 @@
     <ClCompile Include="mesh.cpp">
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
+    <ClCompile Include="shadow_map_fbo.cpp">
+      <Filter>Файлы исходного кода\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="shadow_map_technique.cpp">
+      <Filter>Файлы исходного кода\Effect</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="callback.h">
@@ -107,6 +113,12 @@
     <ClInclude Include="mesh.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
+    <ClInclude Include="shadow_map_fbo.h">
+      <Filter>Заголовочные файлы\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="shadow_map_technique.h">
+      <Filter>Заголовочные файлы\Effect</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="VS.glsl">
@@ -119,6 +131,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="FS.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="FS_shadow_map.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="VS_shadow_map.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

@@ -1,7 +1,6 @@
 #pragma once
 
-#include <iostream>
-#include <fstream>
+
 
 #include "lighting_technique.h"
 #include "utils.h"
@@ -11,29 +10,7 @@ LightingTechnique::LightingTechnique ( )
 { }
 
 
-bool LightingTechnique::SetShader ( const char* pFilename, char* &pShaderText )
-{
-  std::ifstream is ( pFilename, std::ios::in | std::ios::binary | std::ios::ate );
 
-  if ( !is.is_open ( ) )
-  {
-    std::cerr << "Unable to open file " << pFilename << std::endl;
-    return false;
-  }
-
-  long size = (long) is.tellg ( );
-  pShaderText = new char[size + 1];
-
-  is.seekg ( 0, std::ios::beg );
-  is.read ( pShaderText, size );
-  is.close ( );
-
-  pShaderText[size] = 0;
-
-  std::cout << pShaderText << std::endl << std::endl;
-
-  return true;
-}
 
 
 bool LightingTechnique::Init ( )
@@ -43,21 +20,29 @@ bool LightingTechnique::Init ( )
     return false;
   }
 
-  char* pVS = nullptr;
-  SetShader ( "VS.glsl", pVS );
+  bool  succes = true;
 
-  char* pFS = nullptr;
-  SetShader ( "FS.glsl", pFS );
+  char* pShaderText = nullptr;
+  
+  succes = 
+    LoadShaderTextFile ( "VS.glsl", pShaderText ) &&
+    AddShader ( GL_VERTEX_SHADER, pShaderText );
 
-  if ( !AddShader ( GL_VERTEX_SHADER, pVS ) )
+  if ( !succes )
+  {
+    return false;
+  }
+  
+  succes = 
+    LoadShaderTextFile ( "FS.glsl", pShaderText ) &&
+    AddShader ( GL_FRAGMENT_SHADER, pShaderText );
+  
+  if ( !succes )
   {
     return false;
   }
 
-  if ( !AddShader ( GL_FRAGMENT_SHADER, pFS ) )
-  {
-    return false;
-  }
+  SafeDelete ( pShaderText );
 
   if ( !Finalize ( ) )
   {
@@ -98,7 +83,7 @@ bool LightingTechnique::Init ( )
     return false;
   }
 
-  for ( unsigned int i = 0; i < ARRAY_SIZE_IN_ELEMENTS ( m_pointLightsLocation ); i++ ) 
+  for ( unsigned int i = 0; i < Arraylength ( m_pointLightsLocation ); i++ )
   {
     char name[128] = { 0 };
 
@@ -138,7 +123,7 @@ bool LightingTechnique::Init ( )
   }
   
 
-  for ( unsigned int i = 0; i < ARRAY_SIZE_IN_ELEMENTS ( m_spotLightsLocation ); i++ ) 
+  for ( unsigned int i = 0; i < Arraylength ( m_spotLightsLocation ); i++ )
   {
     char name[128] = { 0 };
 
