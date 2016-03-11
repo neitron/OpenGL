@@ -82,7 +82,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\kiril\Source\Repos\OpenGL\Tools\Assimp\include;C:\Users\kiril\Source\Repos\OpenGL\Tools\SOIL\src;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\kiril\Source\Repos\OpenGL 3.x\Tools\Assimp\include;C:\Users\kiril\Source\Repos\OpenGL 3.x\Tools\SOIL\src;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\kiril\Source\Repos\OpenGL 3.x\Tools\SOIL\SOIL_lib %28mine%29\Debug;C:\Users\kiril\Source\Repos\OpenGL 3.x\GL Files\lib;C:\Users\kiril\Source\Repos\OpenGL 3.x\GL Files\glew-1.11.0\lib\Release\Win32;C:\Users\kiril\Source\Repos\OpenGL 3.x\Tools\Assimp\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

@@ -97,7 +97,7 @@ public:
 
     m_pMesh = new Mesh ( );
 
-    return m_pMesh->LoadMesh ( "Content/ship/phoenix_ugv.md2" ); //knight.x   phoenix_ugv.md2
+    return m_pMesh->LoadMesh ( "Content/mon/Кровосос.obj" ); //knight.x   ship/phoenix_ugv.md2
   }
 
   void Run ( )
