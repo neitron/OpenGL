@@ -82,8 +82,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>D:\C++\LIBS\ASSIMP\assimp-3.1.1-win-binaries\include;D:\C++\LIBS\SOIL\src;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files\Assimp\bin\x64;C:\Program Files\Assimp\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\kiril\Source\Repos\OpenGL\Tools\Assimp\include;C:\Users\kiril\Source\Repos\OpenGL\Tools\SOIL\src;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\kiril\Source\Repos\OpenGL 3.x\Tools\SOIL\SOIL_lib %28mine%29\Debug;C:\Users\kiril\Source\Repos\OpenGL 3.x\GL Files\lib;C:\Users\kiril\Source\Repos\OpenGL 3.x\GL Files\glew-1.11.0\lib\Release\Win32;C:\Users\kiril\Source\Repos\OpenGL 3.x\Tools\Assimp\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>C:\Users\neitron\Desktop\Simple OpenGL Image Library\src;$(IncludePath)</IncludePath>
@@ -97,6 +97,7 @@
       <CallingConvention>Cdecl</CallingConvention>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <BrowseInformation>true</BrowseInformation>
+      <AdditionalIncludeDirectories>C:\Users\kiril\Source\Repos\OpenGL 3.x\GL Files\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
