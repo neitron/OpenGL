@@ -28,6 +28,7 @@
     <ClInclude Include="camera.h" />
     <ClInclude Include="glut_backend.h" />
     <ClInclude Include="lighting_technique.h" />
+    <ClInclude Include="main.h" />
     <ClInclude Include="math3d.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="pipeline.h" />

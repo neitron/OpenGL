@@ -34,20 +34,41 @@
     <Filter Include="Заголовочные файлы\Math">
       <UniqueIdentifier>{21fd3022-8a47-42aa-91c5-7ed719aee731}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Заголовочные файлы\Texture">
-      <UniqueIdentifier>{c5063798-6845-42f3-af14-f93db0b5faa7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Файлы исходного кода\Cam">
       <UniqueIdentifier>{e550a5cd-213d-49be-b6e9-b818eaa35363}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Файлы исходного кода\Texture">
-      <UniqueIdentifier>{4c10c92d-9f4f-45d0-a0c1-06d3fbd97b12}</UniqueIdentifier>
     </Filter>
     <Filter Include="Файлы исходного кода\Math">
       <UniqueIdentifier>{cd43eca3-5a00-4d54-b003-1dead592312e}</UniqueIdentifier>
     </Filter>
     <Filter Include="TempShaders">
       <UniqueIdentifier>{4c46f098-5a69-4a96-bdfa-5fbc9680a99b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы исходного кода\Effect\ShadowMap">
+      <UniqueIdentifier>{30107729-9efe-4495-9e54-8e1af1732b51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы исходного кода\Model">
+      <UniqueIdentifier>{25332977-92eb-45f1-b68c-be90e08d8165}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы исходного кода\Model\Texture">
+      <UniqueIdentifier>{4c10c92d-9f4f-45d0-a0c1-06d3fbd97b12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\Effect\ShadowMap">
+      <UniqueIdentifier>{1399faa0-4e20-4098-845e-819bc6e581ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\Effect\Light">
+      <UniqueIdentifier>{7c411778-77fe-46d2-b3d0-56aa0dccb527}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\Model">
+      <UniqueIdentifier>{d401d9a8-18a7-41e0-965f-936cb965e08c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\Model\Texture">
+      <UniqueIdentifier>{c5063798-6845-42f3-af14-f93db0b5faa7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Light">
+      <UniqueIdentifier>{b4760b97-5e7a-44aa-9d55-f84d59f9325c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\ShadowMap">
+      <UniqueIdentifier>{90ed9536-fdfe-40fd-8700-613b98cfae50}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -67,7 +88,7 @@
       <Filter>Файлы исходного кода\Cam</Filter>
     </ClCompile>
     <ClCompile Include="texture.cpp">
-      <Filter>Файлы исходного кода\Texture</Filter>
+      <Filter>Файлы исходного кода\Model\Texture</Filter>
     </ClCompile>
     <ClCompile Include="math3d.cpp">
       <Filter>Файлы исходного кода\Math</Filter>
@@ -75,14 +96,14 @@
     <ClCompile Include="pipeline.cpp">
       <Filter>Файлы исходного кода\Math</Filter>
     </ClCompile>
-    <ClCompile Include="mesh.cpp">
-      <Filter>Файлы исходного кода</Filter>
-    </ClCompile>
     <ClCompile Include="shadow_map_fbo.cpp">
-      <Filter>Файлы исходного кода\Effect</Filter>
+      <Filter>Файлы исходного кода\Effect\ShadowMap</Filter>
     </ClCompile>
     <ClCompile Include="shadow_map_technique.cpp">
-      <Filter>Файлы исходного кода\Effect</Filter>
+      <Filter>Файлы исходного кода\Effect\ShadowMap</Filter>
+    </ClCompile>
+    <ClCompile Include="mesh.cpp">
+      <Filter>Файлы исходного кода\Model</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -92,9 +113,6 @@
     <ClInclude Include="glut_backend.h">
       <Filter>Заголовочные файлы\Back</Filter>
     </ClInclude>
-    <ClInclude Include="lighting_technique.h">
-      <Filter>Заголовочные файлы\Effect</Filter>
-    </ClInclude>
     <ClInclude Include="technique.h">
       <Filter>Заголовочные файлы\Effect</Filter>
     </ClInclude>
@@ -102,7 +120,7 @@
       <Filter>Заголовочные файлы\Cam</Filter>
     </ClInclude>
     <ClInclude Include="texture.h">
-      <Filter>Заголовочные файлы\Texture</Filter>
+      <Filter>Заголовочные файлы\Model\Texture</Filter>
     </ClInclude>
     <ClInclude Include="math3d.h">
       <Filter>Заголовочные файлы\Math</Filter>
@@ -113,34 +131,40 @@
     <ClInclude Include="utils.h">
       <Filter>Заголовочные файлы\Back</Filter>
     </ClInclude>
-    <ClInclude Include="mesh.h">
-      <Filter>Заголовочные файлы</Filter>
-    </ClInclude>
     <ClInclude Include="shadow_map_fbo.h">
-      <Filter>Заголовочные файлы\Effect</Filter>
+      <Filter>Заголовочные файлы\Effect\ShadowMap</Filter>
     </ClInclude>
     <ClInclude Include="shadow_map_technique.h">
-      <Filter>Заголовочные файлы\Effect</Filter>
+      <Filter>Заголовочные файлы\Effect\ShadowMap</Filter>
+    </ClInclude>
+    <ClInclude Include="lighting_technique.h">
+      <Filter>Заголовочные файлы\Effect\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh.h">
+      <Filter>Заголовочные файлы\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>Заголовочные файлы</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="VS.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="FS.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="FS_shadow_map.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="VS_shadow_map.glsl">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="FS_Fail.glsl">
       <Filter>TempShaders</Filter>
     </None>
     <None Include="temp.glsl">
       <Filter>TempShaders</Filter>
+    </None>
+    <None Include="FS.glsl">
+      <Filter>Shaders\Light</Filter>
+    </None>
+    <None Include="VS.glsl">
+      <Filter>Shaders\Light</Filter>
+    </None>
+    <None Include="FS_shadow_map.glsl">
+      <Filter>Shaders\ShadowMap</Filter>
+    </None>
+    <None Include="VS_shadow_map.glsl">
+      <Filter>Shaders\ShadowMap</Filter>
     </None>
   </ItemGroup>
 </Project>
