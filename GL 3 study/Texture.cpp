@@ -56,9 +56,9 @@ bool Texture::Load()
 // Задает активный объект текстуры
 void Texture::Bind(GLenum textureUnit)
 {
-  glActiveTexture(textureUnit);
+  glActiveTexture ( textureUnit );
 
   // Активный объект текстуры, теперь этот объект причастен ко всем вызовам
   // 1: позиция (GL_TEXTURE_2D)
-  glBindTexture(m_textureTarget, m_textureObject);
+  glBindTexture ( m_textureTarget, m_textureObject );
 }

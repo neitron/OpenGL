@@ -6,7 +6,7 @@
 #include "technique.h"
 #include "math3d.h"
 
-const unsigned int MAX_POINT_LIGHTS = 3u; // Максимальное количество источников точесного света
+const unsigned int MAX_POINT_LIGHTS = 2u; // Максимальное количество источников точесного света
 const unsigned int MAX_SPOT_LIGHTS  = 2u; // Максимальное количество источников прожекторного света
 
 
@@ -83,8 +83,6 @@ public:
   LightingTechnique ( );
   virtual bool Init ( );
 
-  // Задает шейдер
-  bool SetShader ( const char* pFilename, char* &pShaderText );
   // Матрица преобразования (world view projection)
   void SetWVP ( const Matrix4f& WVP );
   // Мировая матрица преобразования
@@ -112,6 +110,11 @@ public:
   // Устанавливает несколько источников света
   void SetSpotLights ( unsigned int numLights, const SpotLight* pLights );
   
+  // Матрица преобразования из позиции источника света (world view projection)
+  void SetLightWVP ( const Matrix4f& lightWVP );
+  // Указывает единицу текстуры в сэмплере для карты теней
+  void SetShadowMapTextureUnit ( unsigned int textureUnit );
+
 private:
 
   // Расположения Юниформ (далее Ю) в шейдерах:
@@ -177,6 +180,10 @@ private:
   } m_spotLightsLocation[MAX_SPOT_LIGHTS]; // Массив Ю-позиций источников прожекторного света
 
   GLuint m_numSpotLightsLocation; // Ю-позиция количество прожекторных источников света
+
+  // 6 Для карты теней
+  GLuint m_LightWVPLocation;	// Ю-позиция мaрицы преобразования с позиции света
+  GLuint m_shadowMapLocation;	// Ю-позиция модуля текстуры для карты теней
 
 };
 

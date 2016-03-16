@@ -10,9 +10,6 @@ LightingTechnique::LightingTechnique ( )
 { }
 
 
-
-
-
 bool LightingTechnique::Init ( )
 {
   if ( !Technique::Init ( ) )
@@ -62,8 +59,11 @@ bool LightingTechnique::Init ( )
   m_matSpecularIntensityLocation  = GetUniformLocation ( "gMatSpecularIntensity" );
   m_matSpecularPowerLocation      = GetUniformLocation ( "gSpecularPower" );
 
-  m_numPointLightsLocation = GetUniformLocation ( "gNumPointLights" );
-  m_numSpotLightsLocation = GetUniformLocation ( "gNumSpotLights" );
+  m_numPointLightsLocation  =  GetUniformLocation ( "gNumPointLights" );
+  m_numSpotLightsLocation   =  GetUniformLocation ( "gNumSpotLights" );
+
+  m_LightWVPLocation  = GetUniformLocation ( "gLightWVP" );
+  m_shadowMapLocation = GetUniformLocation ( "gShadowMap" );
 
   if (
     m_WVPLocation                       == INVALID_UNIFORM_LOCATION ||
@@ -77,13 +77,15 @@ bool LightingTechnique::Init ( )
     m_matSpecularIntensityLocation      == INVALID_UNIFORM_LOCATION ||
     m_matSpecularPowerLocation          == INVALID_UNIFORM_LOCATION ||
     m_numPointLightsLocation            == INVALID_UNIFORM_LOCATION ||
-    m_numSpotLightsLocation             == INVALID_UNIFORM_LOCATION
+    m_numSpotLightsLocation             == INVALID_UNIFORM_LOCATION ||
+    m_LightWVPLocation                  == INVALID_UNIFORM_LOCATION ||
+    m_shadowMapLocation                 == INVALID_UNIFORM_LOCATION
     )
   {
     return false;
   }
 
-  for ( unsigned int i = 0; i < Arraylength ( m_pointLightsLocation ); i++ )
+  for ( unsigned int i = 0u; i < Arraylength ( m_pointLightsLocation ); i++ )
   {
     char name[128] = { 0 };
 
@@ -174,6 +176,8 @@ bool LightingTechnique::Init ( )
 }
 
 
+
+
 void LightingTechnique::SetWVP ( const Matrix4f& WVP )
 {
   glUniformMatrix4fv ( m_WVPLocation, 1, GL_TRUE, reinterpret_cast< const GLfloat* >( WVP.m ) );
@@ -252,4 +256,14 @@ void LightingTechnique::SetSpotLights ( unsigned int numLights, const SpotLight*
     glUniform1f ( m_spotLightsLocation[i].atten.linear,   pLights[i].attenuation.linear );
     glUniform1f ( m_spotLightsLocation[i].atten.exp,      pLights[i].attenuation.exp );
   }
+}
+
+void LightingTechnique::SetLightWVP( const Matrix4f &lightWVP )
+{
+  glUniformMatrix4fv ( m_LightWVPLocation, 1, GL_TRUE, reinterpret_cast< const GLfloat* >( lightWVP.m ) );
+}
+
+void LightingTechnique::SetShadowMapTextureUnit( unsigned int textureUnit )
+{
+  glUniform1i ( m_shadowMapLocation, textureUnit );
 }

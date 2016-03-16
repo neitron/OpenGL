@@ -7,6 +7,8 @@ in vec2 texCoord0;
 in vec3 normal0;
 in vec3 worldPos0;
 
+in vec4 lightSpacePos;
+
 out vec4 fragColor;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -43,9 +45,9 @@ struct PointLight
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 struct SpotLight
 {
-      PointLight  base;
-      vec3        direction;
-      float       cutOff;    // cos of angle
+  PointLight  base;
+  vec3        direction;
+  float       cutOff;    // cos of angle
 };
 
 
@@ -59,6 +61,7 @@ uniform int					      gNumPointLights;
 uniform DirectionalLight	gDirectionalLight;
 
 uniform sampler2D			gSampler;
+uniform sampler2D			gShadowMap;
 
 uniform vec3				gEyeWorldPos;
 uniform float				gMatSpecularIntensity;
@@ -66,8 +69,37 @@ uniform float				gSpecularPower;
 
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+float CalcShadowFactor(vec4 lightSpacePos)
+{
+  // Деление проекции (перспективы) 
+  // WVP (Clip Space) => нормированные координаты NDC 
+  // (не путать с простой нормализацией)
+  vec3 projCoords = lightSpacePos.xyz / lightSpacePos.w; 
+  vec2 UVCoords;
+  
+  // Мы переводим координаты NDC (xMin = -1, xMax = 1) 
+  // в тестурные (xMin = 0, xMax = 1)
+	UVCoords.x = 0.5 * projCoords.x + 0.5;
+  UVCoords.y = 0.5 * projCoords.y + 0.5;
+    
+	float z = 0.5 * projCoords.z + 0.5;
+  float depth = texture2D ( gShadowMap, UVCoords ).x;
+    
+	if ( depth < ( z + 0.00001 ) )
+	{
+    return 0.2;
+	}
+  else
+	{
+    return 1.0;
+	}
+}
+
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-vec4 CalcLightInternal ( BaseLight light, vec3 lightDirection, vec3 normal )
+vec4 CalcLightInternal ( BaseLight light, vec3 lightDirection, vec3 normal, float shadowFactor )
 {
   vec4	ambientColor	= vec4 ( light.color, 1.0f ) * light.ambientIntensity;
   vec4  diffuseColor  = vec4 ( 0.0f, 0.0f, 0.0f, 0.0f );
@@ -91,7 +123,7 @@ vec4 CalcLightInternal ( BaseLight light, vec3 lightDirection, vec3 normal )
     }
   }
 
-  return ( ambientColor + diffuseColor + specularColor );
+  return ( ambientColor + shadowFactor * ( diffuseColor + specularColor ) );
 }
 
 
@@ -99,47 +131,50 @@ vec4 CalcLightInternal ( BaseLight light, vec3 lightDirection, vec3 normal )
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 vec4 CalcDirectionalLight ( vec3 normal )
 {
-     return CalcLightInternal ( gDirectionalLight.base, gDirectionalLight.direction, normal);
+     return CalcLightInternal ( gDirectionalLight.base, gDirectionalLight.direction, normal, 1.0);
 }
 
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-vec4 CalcPointLight ( PointLight pointLight, vec3 normal )
+vec4 CalcPointLight ( PointLight pointLight, vec3 normal, vec4 lightSpacePos )
 {
-     vec3 lightDirection = worldPos0 - pointLight.position;
-     float distanceVar = length ( lightDirection );
-     lightDirection = normalize ( lightDirection );
- 
-     vec4 color = CalcLightInternal ( pointLight.base, lightDirection, normal);
-     
-     float attenuation =  pointLight.atten.constant +
-                          pointLight.atten.linear * distanceVar +
-                          pointLight.atten.expVar * distanceVar * distanceVar;
- 
-     return color / attenuation;
+  vec3 lightDirection = worldPos0 - pointLight.position;
+  float distanceVar = length ( lightDirection );
+  lightDirection = normalize ( lightDirection );
+
+  float shadowFactor = CalcShadowFactor ( lightSpacePos );
+
+  vec4 color = CalcLightInternal ( pointLight.base, lightDirection, normal, shadowFactor);
+  
+  float attenuation =  pointLight.atten.constant +
+                       pointLight.atten.linear * distanceVar +
+                       pointLight.atten.expVar * distanceVar * distanceVar;
+  
+  return color / attenuation;
 }
 
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-vec4 CalcSpotLight ( SpotLight sLight, vec3 normal )
+vec4 CalcSpotLight ( SpotLight sLight, vec3 normal, vec4 lightSpacePos )
 {
-      vec3 lightToPixel = normalize ( worldPos0 - sLight.base.position);
-      float spotFactor = dot ( lightToPixel, sLight.direction );
- 
-      if ( spotFactor > sLight.cutOff ) 
-      {
-        vec4 color = CalcPointLight ( sLight.base, normal);
-        
-        return 
-          color * ( 1.0f - ( 1.0f - spotFactor ) * 1.0f / ( 1.0f - sLight.cutOff ) );
-      }
-      else 
-      {
-        return vec4 ( 0.0f, 0.0f, 0.0f, 0.0f );
-      }
+  vec3 lightToPixel = normalize ( worldPos0 - sLight.base.position);
+  float spotFactor = dot ( lightToPixel, sLight.direction );
+  
+  if ( spotFactor > sLight.cutOff ) 
+  {
+    vec4 color = CalcPointLight ( sLight.base, normal, lightSpacePos);
+    
+    return 
+      color * ( 1.0f - ( 1.0f - spotFactor ) * 1.0f / ( 1.0f - sLight.cutOff ) );
+  }
+  else 
+  {
+    return vec4 ( 0.0f, 0.0f, 0.0f, 0.0f );
+  }
 }
+
 
 
 
@@ -148,6 +183,7 @@ void main ( void )
 {
   vec3 normal = normalize ( normal0 );
   
+  // My simple magic :)))) ... ( иначе шейдер считает что этих переменных нет )
   gDirectionalLight.base.color;
   gDirectionalLight.base.ambientIntensity;
   gDirectionalLight.base.diffuseIntensity;
@@ -155,18 +191,20 @@ void main ( void )
   gPointLights[ 0 ].base.color;
   gPointLights[ 0 ].base.ambientIntensity;
   gPointLights[ 0 ].base.diffuseIntensity;
+  // ...magic end
 
   vec4 totalLight = CalcDirectionalLight ( normal );
   
   for ( int i = 0; i < gNumPointLights; i++ ) 
   {
-    totalLight += CalcPointLight ( gPointLights[ i ], normal );
+    totalLight += CalcPointLight ( gPointLights[ i ], normal, lightSpacePos );
   }
 
   for ( int i = 0 ; i < gNumSpotLights; i++ ) 
   {
-    totalLight += CalcSpotLight ( gSpotLights[ i ], normal );
+    totalLight += CalcSpotLight ( gSpotLights[ i ], normal, lightSpacePos );
   }
   
-  fragColor = texture2D ( gSampler, texCoord0 ) * totalLight;
+  vec4 samplerColor = texture2D ( gSampler, texCoord0.xy );
+  fragColor = samplerColor * totalLight;
 }

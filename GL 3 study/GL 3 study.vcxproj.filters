@@ -46,6 +46,9 @@
     <Filter Include="Файлы исходного кода\Math">
       <UniqueIdentifier>{cd43eca3-5a00-4d54-b003-1dead592312e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="TempShaders">
+      <UniqueIdentifier>{4c46f098-5a69-4a96-bdfa-5fbc9680a99b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -124,12 +127,6 @@
     <None Include="VS.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="temp.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="FS_Fail.glsl">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="FS.glsl">
       <Filter>Shaders</Filter>
     </None>
@@ -138,6 +135,12 @@
     </None>
     <None Include="VS_shadow_map.glsl">
       <Filter>Shaders</Filter>
+    </None>
+    <None Include="FS_Fail.glsl">
+      <Filter>TempShaders</Filter>
+    </None>
+    <None Include="temp.glsl">
+      <Filter>TempShaders</Filter>
     </None>
   </ItemGroup>
 </Project>

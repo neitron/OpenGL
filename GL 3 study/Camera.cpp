@@ -7,11 +7,11 @@
 #include "Camera.h"
 
 
-const float Camera::STEP_SIZE ( 0.1f );  // arrows motion cam step
+const float Camera::STEP_SIZE ( 0.1f );   // arrows motion cam step
 
-const int Camera::MARGIN ( 10 ); // auto rotate cam mardin screen
+const int Camera::MARGIN ( 10 );          // auto rotate cam mardin screen
 
-float Camera::STEP_SIZE_MOUSE ( 0.1f );  // MOUSE motion cam step
+float Camera::STEP_SIZE_MOUSE ( 0.1f );   // MOUSE motion cam step
 
 
 Camera::Camera ( int wWidth, int wHeight ) :

@@ -32,22 +32,23 @@ public:
     m_pGameCamera       ( nullptr ),
     m_pMesh             ( nullptr ),
     m_pQuad             ( nullptr ),
-    m_pEffect           ( nullptr ),
-    m_pShadowMapTech    ( nullptr ),
-    m_Scale             ( 0.0f ),
-    m_specularPower     ( 0.0f ),
-    m_specularIntensity ( 0.0f )
+    m_pGroundTex        ( nullptr ),
+    m_pLightingEffect   ( nullptr ),
+    m_pShadowMapEffect  ( nullptr ),
+    m_scale             ( 0.0f ),
+    m_specularPower     ( 0.5f ),
+    m_specularIntensity ( 0.5f )
   {
-    m_directionalLight.color            = Vector3f ( 1.0f );
+    /*m_directionalLight.color            = Vector3f ( 1.0f );
     m_directionalLight.ambientIntensity = 1.0f;
     m_directionalLight.diffuseIntensity = 0.1f;
-    m_directionalLight.direction        = Vector3f ( 1.0f, 0.0, 1.0 );
+    m_directionalLight.direction        = Vector3f ( 1.0f, 0.0, 1.0 );*/
   
-    m_spotLight.ambientIntensity = 0.0f;
-    m_spotLight.diffuseIntensity = 0.9f;
+    m_spotLight.ambientIntensity = 0.3f;
+    m_spotLight.diffuseIntensity = 1.3f;
     m_spotLight.color = Vector3f ( 1.0 );
     m_spotLight.attenuation.linear = 0.01f;
-    m_spotLight.position = Vector3f ( -20.0f, 20.0f, 5.0f );
+    m_spotLight.position = Vector3f ( -20.0f, 20.0f, 1.0f );
     m_spotLight.direction = Vector3f ( 1.0f, -1.0f, 0.0f );
     m_spotLight.cutOff = 20.0f;
   }
@@ -55,10 +56,11 @@ public:
   ~Main ( )
   {
     SafeDelete ( m_pGameCamera );
-    SafeDelete ( m_pEffect );
+    SafeDelete ( m_pLightingEffect );
     SafeDelete ( m_pMesh );
     SafeDelete ( m_pQuad );
-    SafeDelete ( m_pShadowMapTech );
+    SafeDelete ( m_pGroundTex );
+    SafeDelete ( m_pShadowMapEffect );
   }
 
   bool Init ( )
@@ -68,47 +70,89 @@ public:
       return false;
     }
 
-    m_pGameCamera = new Camera ( WINDOW_WIDTH, WINDOW_HEIGHT );
+    Vector3f pos    ( 3.0f, 8.0f, -10.0 );
+    Vector3f target ( 0.0f, -2.0f, 1.0f );
+    Vector3f up     ( 0.0f, 1.0f, 0.0f );
+    m_pGameCamera = new Camera ( WINDOW_WIDTH, WINDOW_HEIGHT, pos, target, up );
 
-    m_pEffect = new LightingTechnique ( );
+    
+    #pragma region LIGHT EFFECT
 
-    if ( !m_pEffect->Init ( ) )
+    m_pLightingEffect = new LightingTechnique ( );
+
+    if ( !m_pLightingEffect->Init ( ) )
     {
       printf ( "Error initializing the lighting technique\n" );
       return false;
     }
 
-    m_pShadowMapTech = new ShadowMapTechnique ( );
+    m_pLightingEffect->Enable ( );
 
-    if ( !m_pShadowMapTech->Init ( ) ) 
+    m_pLightingEffect->SetSpotLights ( 1, &m_spotLight );
+    m_pLightingEffect->SetTextureUnit ( 0 );
+    m_pLightingEffect->SetShadowMapTextureUnit ( 1 );
+
+    #pragma endregion
+    
+    #pragma region SHADOW MAP EFFECT
+
+    m_pShadowMapEffect = new ShadowMapTechnique ( );
+
+    if ( !m_pShadowMapEffect->Init ( ) )
     {
       printf ( "Error initializing the shadow map technique\n" );
       return false;
     }
 
-    //m_pEffect->SetTextureUnit ( 0 );
+    #pragma endregion
 
-    m_pQuad = new Mesh ( );
+    #pragma region MESHES INIT
 
-    if ( !m_pQuad->LoadMesh ( "Content/quad.obj" ) ) 
+
+    // Model
+    m_pMesh = new Mesh ( );
+
+    if ( !m_pMesh->LoadMesh ( "Content/ship/phoenix_ugv.md2" ) ) //knight.x   ship/phoenix_ugv.md2   mon/Кровосос.obj 
     {
       return false;
     }
 
-    m_pMesh = new Mesh ( );
+    #pragma endregion
 
-    return m_pMesh->LoadMesh ( "Content/mon/Кровосос.obj" ); //knight.x   ship/phoenix_ugv.md2
+
+    // Ground model
+    m_pQuad = new Mesh ( );
+
+    if ( !m_pQuad->LoadMesh ( "Content/quad.obj" ) )
+    {
+      return false;
+    }
+
+    m_pGroundTex = new Texture ( GL_TEXTURE_2D, "Content/metal.jpg" );
+
+    if ( !m_pGroundTex->Load ( ) )
+    {
+      return false;
+    }
+
+    
+
+    return true;
+
   }
+
+
 
   void Run ( )
   {
     GLUTBackendRun ( this );
   }
 
+
   virtual void RenderSceneCB ( )
   {
     m_pGameCamera->OnRender ( );
-    m_Scale += 0.05f;
+    m_scale += 0.05f;
 
     ShadowMapPass ( );
     RenderPass ( );
@@ -116,45 +160,74 @@ public:
     glutSwapBuffers ( );
   }
 
+
   virtual void ShadowMapPass ( )
   {
     m_shadowMapFBO.BindForWriting ( );
 
     glClear ( GL_DEPTH_BUFFER_BIT );
     
-    m_pShadowMapTech->Enable ( );
+    m_pShadowMapEffect->Enable ( );
     
     Pipeline p;
-    p.Scale ( 0.2f, 0.2f, 0.2f );
-    p.Rotate ( 0.0f, m_Scale, 0.0f );
-    p.WorldPos ( 0.0f, 0.0f, 5.0f );
+    p.Scale		  ( 0.1f, 0.1f, 0.1f );
+    p.Rotate	  ( 0.0f, m_scale, 0.0f );
+    p.WorldPos	( 0.0f, 0.0f, 5.0f );
     p.SetCamera ( m_spotLight.position, m_spotLight.direction, Vector3f ( 0.0f, 1.0f, 0.0f ) );
     p.SetPerspectiveProj ( 60.0f, WINDOW_WIDTH, WINDOW_HEIGHT, 1.0f, 50.0f );
 
-    m_pShadowMapTech->SetWVP ( p.GetWVPTrans ( ) );
+    m_pShadowMapEffect->SetWVP ( p.GetWVPTrans ( ) );
     m_pMesh->Render ( );
 
     glBindFramebuffer ( GL_FRAMEBUFFER, 0 );
   }
 
+
+
   virtual void RenderPass ( )
   {
     glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     
-    //m_pEffect->Enable ( );
+    m_pLightingEffect->Enable ( );
 
-    m_pShadowMapTech->SetTextureUnit ( 0 );
-    m_shadowMapFBO.BindForReading ( GL_TEXTURE0 );
+    m_shadowMapFBO.BindForReading ( GL_TEXTURE1 );
 
     Pipeline p;
-    p.Scale ( 5.0f, 5.0f, 5.0f );
-    p.WorldPos ( 0.0f, 0.0f, 10.0f );
-    p.SetCamera ( m_pGameCamera->GetPos ( ), m_pGameCamera->GetTarget ( ), m_pGameCamera->GetUp ( ) );
+    
+    p.Scale     ( 10.0f, 10.0f, 10.0f );
+    p.WorldPos  ( 0.0f, 0.0f, 1.0f );
+    p.Rotate    ( 90.0f, 0.0f, 0.0f );
+
     p.SetPerspectiveProj ( 60.0f, WINDOW_WIDTH, WINDOW_HEIGHT, 1.0f, 50.0f );
-    
-    m_pShadowMapTech->SetWVP ( p.GetWVPTrans ( ) );
-    
+
+    // Матрица трансформации с позиции камеры
+    p.SetCamera ( m_pGameCamera->GetPos ( ), m_pGameCamera->GetTarget ( ), m_pGameCamera->GetUp ( ) );
+    m_pLightingEffect->SetWVP ( p.GetWVPTrans ( ) );
+    m_pLightingEffect->SetWorldMatrix ( p.GetWorldTrans ( ) );
+
+    // Матрица трансформации с позиции точечного света 
+    p.SetCamera ( m_spotLight.position, m_spotLight.direction, Vector3f ( 0.0f, 1.0f, 0.0f ) );
+    m_pLightingEffect->SetLightWVP ( p.GetWVPTrans ( ) );
+    m_pLightingEffect->SetEyeWorldPos ( m_pGameCamera->GetPos ( ) );
+
+    // Земля
+    m_pGroundTex->Bind ( GL_TEXTURE0 );
     m_pQuad->Render ( );
+
+    p.Scale ( 0.1f, 0.1f, 0.1f );
+    p.Rotate ( 0.0f, m_scale, 0.0f );
+    p.WorldPos ( 0.0f, 0.0f, 3.0f );
+
+    p.SetCamera ( m_pGameCamera->GetPos ( ), m_pGameCamera->GetTarget ( ), m_pGameCamera->GetUp ( ) );
+    m_pLightingEffect->SetWVP ( p.GetWVPTrans ( ) );
+    m_pLightingEffect->SetWorldMatrix ( p.GetWorldTrans ( ) );
+
+    p.SetCamera ( m_spotLight.position, m_spotLight.direction, Vector3f ( 0.0f, 1.0f, 0.0f ) );
+    m_pLightingEffect->SetLightWVP ( p.GetWVPTrans ( ) );
+
+    // Model
+    m_pMesh->Render ( );
+
   }
   
   virtual void IdleCB ( )
@@ -172,6 +245,10 @@ public:
     switch ( key )
     {
     case 'q':
+      std::exit ( EXIT_SUCCESS );
+      break;
+
+    case 'й':
       std::exit ( EXIT_SUCCESS );
       break;
 
@@ -227,19 +304,21 @@ private:
   Camera*   m_pGameCamera;
 
   Mesh*     m_pMesh;
+  
   Mesh*     m_pQuad;
+  Texture*  m_pGroundTex;
 
-  LightingTechnique* m_pEffect;
-  DirectionLight m_directionalLight;
+  LightingTechnique*  m_pLightingEffect;
+  DirectionLight      m_directionalLight;
 
-  ShadowMapFBO m_shadowMapFBO;
-  SpotLight m_spotLight;
-  ShadowMapTechnique* m_pShadowMapTech;
+  ShadowMapFBO        m_shadowMapFBO;
+  SpotLight           m_spotLight;
+  ShadowMapTechnique* m_pShadowMapEffect;
 
   float m_specularPower;
   float m_specularIntensity;
 
-  float m_Scale;
+  float m_scale;
 };
 
 
