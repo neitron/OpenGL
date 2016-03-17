@@ -98,6 +98,19 @@ struct Vector3f
   void Rotate ( float angle, const Vector3f& axis );
 };
 
+
+
+struct PersProjInfo
+{
+  float FOV;
+  float width;
+  float height;
+  float zNear;
+  float zFar;
+};
+
+
+
 // Матрица 4х4 :float
 class Matrix4f
 {
@@ -134,7 +147,7 @@ public:
   void InitRotateTransform(float rotateX, float rotateY, float rotateZ);
   void InitTranslationTransform(float x, float y, float z);
   void InitCameraTransform(const Vector3f& target, const Vector3f& up);
-  void InitPersProjTransform(float FOV, float width, float height, float zNear, float zFar);
+  void InitPersProjTransform( PersProjInfo& p );
 };
 
 // Кватернион

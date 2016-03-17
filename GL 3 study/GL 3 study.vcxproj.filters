@@ -70,6 +70,30 @@
     <Filter Include="Shaders\ShadowMap">
       <UniqueIdentifier>{90ed9536-fdfe-40fd-8700-613b98cfae50}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\SkyBox">
+      <UniqueIdentifier>{3010268e-6a6e-4720-8fd5-925f2edee5f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\Effect\SkyBox">
+      <UniqueIdentifier>{be896234-7844-4541-9bbd-cb3a2a0e17fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\SkyBox">
+      <UniqueIdentifier>{2360e55f-8f0c-4210-88cb-88c9ac6be520}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Заголовочные файлы\SkyBox\CubeMap">
+      <UniqueIdentifier>{e4f1c50e-6794-46ed-872b-bf042588bdbc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы исходного кода\Effect\SkyBox">
+      <UniqueIdentifier>{c7c1a2db-2dea-40b8-a1db-23af0c0553aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы исходного кода\Effect\Light">
+      <UniqueIdentifier>{ed0e37e6-faa3-4a18-8514-8c3e5f309d9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы исходного кода\SkyBox">
+      <UniqueIdentifier>{9bfb338a-1b6e-4501-866a-dc36361aa591}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы исходного кода\SkyBox\CubeMap">
+      <UniqueIdentifier>{02347cfd-45ed-4d52-b7d0-9afdfd5d0257}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -77,9 +101,6 @@
     </ClCompile>
     <ClCompile Include="glut_backend.cpp">
       <Filter>Файлы исходного кода\Back</Filter>
-    </ClCompile>
-    <ClCompile Include="lighting_technique.cpp">
-      <Filter>Файлы исходного кода\Effect</Filter>
     </ClCompile>
     <ClCompile Include="technique.cpp">
       <Filter>Файлы исходного кода\Effect</Filter>
@@ -104,6 +125,18 @@
     </ClCompile>
     <ClCompile Include="mesh.cpp">
       <Filter>Файлы исходного кода\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="cubemap_texture.cpp">
+      <Filter>Файлы исходного кода\SkyBox\CubeMap</Filter>
+    </ClCompile>
+    <ClCompile Include="skybox_technique.cpp">
+      <Filter>Файлы исходного кода\Effect\SkyBox</Filter>
+    </ClCompile>
+    <ClCompile Include="lighting_technique.cpp">
+      <Filter>Файлы исходного кода\Effect\Light</Filter>
+    </ClCompile>
+    <ClCompile Include="skybox.cpp">
+      <Filter>Файлы исходного кода\SkyBox</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -146,6 +179,15 @@
     <ClInclude Include="main.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
+    <ClInclude Include="cubemap_texture.h">
+      <Filter>Заголовочные файлы\SkyBox\CubeMap</Filter>
+    </ClInclude>
+    <ClInclude Include="skybox_technique.h">
+      <Filter>Заголовочные файлы\Effect\SkyBox</Filter>
+    </ClInclude>
+    <ClInclude Include="skybox.h">
+      <Filter>Заголовочные файлы\SkyBox</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="FS_Fail.glsl">
@@ -165,6 +207,12 @@
     </None>
     <None Include="VS_shadow_map.glsl">
       <Filter>Shaders\ShadowMap</Filter>
+    </None>
+    <None Include="VS_skybox.glsl">
+      <Filter>Shaders\SkyBox</Filter>
+    </None>
+    <None Include="FS_skybox.glsl">
+      <Filter>Shaders\SkyBox</Filter>
     </None>
   </ItemGroup>
 </Project>

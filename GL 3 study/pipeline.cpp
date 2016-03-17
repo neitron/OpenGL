@@ -25,7 +25,7 @@ const Matrix4f& Pipeline::GetWVPTrans()
   
   // Матрица проекции перспективы камеры
   Matrix4f PersProjTrans;
-  PersProjTrans.InitPersProjTransform ( m_persProj.FOV, m_persProj.Width, m_persProj.Height, m_persProj.zNear, m_persProj.zFar );
+  PersProjTrans.InitPersProjTransform ( m_persProjInfo );
 
   // Перемножаем для получения единой матрици трансформации
   m_transformation = PersProjTrans * CameraRotateTrans * CameraTranslationTrans * TranslationTrans * RotateTrans * ScaleTrans;

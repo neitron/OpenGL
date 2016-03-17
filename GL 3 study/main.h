@@ -18,6 +18,7 @@
 #include "mesh.h"
 #include "shadow_map_fbo.h"
 #include "shadow_map_technique.h"
+#include "skybox.h"
 
 const int WINDOW_WIDTH = 1300;
 const int WINDOW_HEIGHT = 700;
@@ -71,7 +72,9 @@ private:
   SpotLight           m_spotLight;
   ShadowMapTechnique* m_pShadowMapEffect;
 
-  
+  SkyBox* m_pSkyBox;
+
+  PersProjInfo m_persProjInfo;
 
   float m_specularPower;
   float m_specularIntensity;

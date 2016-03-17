@@ -167,16 +167,16 @@ void Matrix4f::InitCameraTransform(const Vector3f& target, const Vector3f& up)
 }
 
 // Матрица преобразования перспективы
-void Matrix4f::InitPersProjTransform(float FOV, float width, float height, float zNear, float zFar)
+void Matrix4f::InitPersProjTransform( PersProjInfo& p )
 {
-    const float ar         = width / height;
-    const float zRange     = zNear - zFar;
-    const float tanHalfFOV = tanf ( Angle::ToRadian ( FOV / 2.0f ) );
+    const float ar         = p.width / p.height;
+    const float zRange     = p.zNear - p.zFar;
+    const float tanHalfFOV = tanf ( Angle::ToRadian ( p.FOV / 2.0f ) );
 
-    m[0][0] = 1.0f/(tanHalfFOV * ar); m[0][1] = 0.0f;            m[0][2] = 0.0f;          m[0][3] = 0.0;
-    m[1][0] = 0.0f;                   m[1][1] = 1.0f/tanHalfFOV; m[1][2] = 0.0f;          m[1][3] = 0.0;
-    m[2][0] = 0.0f;                   m[2][1] = 0.0f;            m[2][2] = (-zNear -zFar)/zRange ; m[2][3] = 2.0f * zFar*zNear/zRange;
-    m[3][0] = 0.0f;                   m[3][1] = 0.0f;            m[3][2] = 1.0f;          m[3][3] = 0.0;
+    m[0][0] = 1.0f / ( tanHalfFOV * ar ); m[0][1] = 0.0f;               m[0][2] = 0.0f;                             m[0][3] = 0.0;
+    m[1][0] = 0.0f;                       m[1][1] = 1.0f / tanHalfFOV;  m[1][2] = 0.0f;                             m[1][3] = 0.0;
+    m[2][0] = 0.0f;                       m[2][1] = 0.0f;               m[2][2] = ( -p.zNear - p.zFar ) / zRange ;  m[2][3] = 2.0f * p.zFar * p.zNear / zRange;
+    m[3][0] = 0.0f;                       m[3][1] = 0.0f;               m[3][2] = 1.0f;                             m[3][3] = 0.0;
 }
 
 Quaternion::Quaternion(const Quaternion &v)

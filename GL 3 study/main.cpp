@@ -38,6 +38,7 @@ Main::Main ( ) :
   m_pModelTex         ( nullptr ),
   m_pLightingEffect   ( nullptr ),
   m_pShadowMapEffect  ( nullptr ),
+  m_pSkyBox           ( nullptr ),
   m_scale             ( 0.0f ),
   m_specularPower     ( 0.5f ),
   m_specularIntensity ( 0.5f )
@@ -50,12 +51,18 @@ Main::Main ( ) :
   m_spotLight.ambientIntensity = 0.3f;
   m_spotLight.diffuseIntensity = 0.9f;
   m_spotLight.cutOff = 50.0f;
-  m_spotLight.attenuation.linear = 0.02f;
+  m_spotLight.attenuation.linear = 0.01f;
 
   m_spotLight.color     = Vector3f ( 1.1f, 1.1f, 1.0f );
-  m_spotLight.position  = Vector3f ( -20.0f, 40.0f, 1.0f );
+
+  m_spotLight.position  = Vector3f ( -20.0f, 30.0f, 1.0f );
   m_spotLight.direction = Vector3f ( 1.0f, -1.0f, 0.0f );
   
+  m_persProjInfo.FOV = 60.0f;
+  m_persProjInfo.height = WINDOW_HEIGHT;
+  m_persProjInfo.width = WINDOW_WIDTH;
+  m_persProjInfo.zNear = 1.0f;
+  m_persProjInfo.zFar = 100.0f;
 }
 
 Main::~Main ( )
@@ -67,6 +74,7 @@ Main::~Main ( )
   SafeDelete ( m_pQuad );
   SafeDelete ( m_pGroundTex );
   SafeDelete ( m_pShadowMapEffect );
+  SafeDelete ( m_pSkyBox );
 }
 
 bool Main::Init ( )
@@ -76,7 +84,7 @@ bool Main::Init ( )
     return false;
   }
 
-  Vector3f pos ( -30.0f, 30.0f, 1.0f );
+  Vector3f pos ( -20.0f, 30.0f, 1.0f );
   Vector3f target ( 1.0f, -1.0f, 0.0f );
   Vector3f up ( 0.0f, 1.0f, 0.0f );
   m_pGameCamera = new Camera ( WINDOW_WIDTH, WINDOW_HEIGHT, pos, target, up );
@@ -145,6 +153,24 @@ bool Main::Init ( )
 
 #pragma endregion
 
+#pragma region SKYBOX
+
+  m_pSkyBox = new SkyBox ( m_pGameCamera, m_persProjInfo );
+
+  if ( !m_pSkyBox->Init ( ".",
+    "Content/SkyBox/sky_right.jpg",
+    "Content/SkyBox/sky_left.jpg",
+    "Content/SkyBox/sky_top.jpg",
+    "Content/SkyBox/sky_bot.jpg",
+    "Content/SkyBox/sky_front.jpg",
+    "Content/SkyBox/sky_back.jpg" ) ) 
+  {
+    return false;
+  }
+
+#pragma endregion
+
+
   return true;
 }
 
@@ -158,7 +184,7 @@ void Main::RenderSceneCB ( )
   m_pGameCamera->OnRender ( );
   m_scale += 0.05f;
 
-  m_spotLight.position  = Vector3f ( -20.0f, 40.0f, 1.0f );
+  m_spotLight.position  = Vector3f ( -20.0f, 30.0f, 1.0f );
   m_spotLight.direction = Vector3f ( 1.0f, -1.0f, 0.0f );
 
   ShadowMapPass ( );
@@ -181,7 +207,7 @@ void Main::ShadowMapPass ( )
   p.Rotate ( 0.0f, m_scale, 0.0f );
   p.WorldPos ( 0.0f, 0.0f, 5.0f );
   p.SetCamera ( m_spotLight.position, m_spotLight.direction, Vector3f ( 0.0f, 1.0f, 0.0f ) );
-  p.SetPerspectiveProj ( 60.0f, WINDOW_WIDTH, WINDOW_HEIGHT, 1.0f, 70.0f );
+  p.SetPerspectiveProj ( m_persProjInfo );
 
   m_pShadowMapEffect->SetWVP ( p.GetWVPTrans ( ) );
   m_pMesh->Render ( );
@@ -204,7 +230,7 @@ void Main::RenderPass ( )
   p.WorldPos ( 0.0f, 0.0f, 1.0f );
   p.Rotate ( 90.0f, 0.0f, 0.0f );
 
-  p.SetPerspectiveProj ( 60.0f, WINDOW_WIDTH, WINDOW_HEIGHT, 1.0f, 70.0f );
+  p.SetPerspectiveProj ( m_persProjInfo );
 
   // Матрица трансформации с позиции точечного света для рендера земли 
   p.SetCamera ( m_spotLight.position, m_spotLight.direction, Vector3f ( 0.0f, 1.0f, 0.0f ) );
@@ -222,7 +248,7 @@ void Main::RenderPass ( )
 
   p.Scale ( 0.1f, 0.1f, 0.1f );
   p.Rotate ( 0.0f, m_scale, 0.0f );
-  p.WorldPos ( 0.0f, 0.0f, 4.0f );
+  p.WorldPos ( 0.0f, 0.0f, 3.0f );
 
   // Матрица трансформации с позиции точечного света для рендера земли
   p.SetCamera ( m_spotLight.position, m_spotLight.direction, Vector3f ( 0.0f, 1.0f, 0.0f ) );
@@ -236,6 +262,8 @@ void Main::RenderPass ( )
   // Model
   m_pModelTex->Bind ( GL_TEXTURE0 );
   m_pMesh->Render ( );
+
+  m_pSkyBox->Render ( );
 }
 
 void Main::IdleCB ( )

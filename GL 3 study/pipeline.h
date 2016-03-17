@@ -30,25 +30,25 @@ public:
 
     void Rotate(float RotateX, float RotateY, float RotateZ)
     {
-        m_rotateInfo.x = RotateX;
-        m_rotateInfo.y = RotateY;
-        m_rotateInfo.z = RotateZ;
+      m_rotateInfo.x = RotateX;
+      m_rotateInfo.y = RotateY;
+      m_rotateInfo.z = RotateZ;
     }
 
-    void SetPerspectiveProj(float FOV, float Width, float Height, float zNear, float zFar)
+    void SetPerspectiveProj( PersProjInfo& p )
     {
-        m_persProj.FOV    = FOV;
-        m_persProj.Width  = Width;
-        m_persProj.Height = Height;
-        m_persProj.zNear  = zNear;
-        m_persProj.zFar   = zFar;
+      m_persProjInfo.FOV    = p.FOV;
+      m_persProjInfo.width  = p.width;
+      m_persProjInfo.height = p.height;
+      m_persProjInfo.zNear  = p.zNear;
+      m_persProjInfo.zFar   = p.zFar;
     }
 
     void SetCamera ( const Vector3f& Pos, const Vector3f& Target, const Vector3f& Up )
     {
-        m_camera.Pos    = Pos;
-        m_camera.Target = Target;
-        m_camera.Up     = Up;
+      m_camera.Pos    = Pos;
+      m_camera.Target = Target;
+      m_camera.Up     = Up;
     }
 
     // Итоговая матрица трансформации
@@ -61,14 +61,7 @@ private:
     Vector3f m_worldPos;
     Vector3f m_rotateInfo;
 
-    struct 
-    {
-        float FOV;
-        float Width;
-        float Height;
-        float zNear;
-        float zFar;
-    } m_persProj;
+    PersProjInfo m_persProjInfo;
 
     struct 
     {
