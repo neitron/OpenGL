@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "mesh.h"
+#include "engine_common.h"
 
 Mesh::MeshEntry::MeshEntry ( )
 {
@@ -64,20 +65,21 @@ bool Mesh::LoadMesh ( const std::string& filename )
   const aiScene* pScene = importer.ReadFile ( filename.c_str ( ), 
     aiPostProcessSteps::aiProcess_Triangulate |
     aiPostProcessSteps::aiProcess_GenSmoothNormals |
-    aiPostProcessSteps::aiProcess_FlipUVs );
+    aiPostProcessSteps::aiProcess_FlipUVs |
+    aiPostProcessSteps::aiProcess_CalcTangentSpace );
   
-  bool ret = false;
+  bool returnResult = false;
 
   if ( pScene ) 
   {
-    ret = InitFromScene ( pScene, filename );
+    returnResult = InitFromScene ( pScene, filename );
   }
   else 
   {
     printf ( "Error parsing '%s': '%s'\n", filename.c_str ( ), importer.GetErrorString ( ) );
   }
 
-  return ret;
+  return returnResult;
 }
 
 bool Mesh::InitFromScene ( const aiScene* pScene, const std::string& filename )
@@ -107,13 +109,17 @@ void Mesh::InitMesh ( unsigned int index, const aiMesh* paiMesh )
 
   for ( unsigned int i = 0; i < paiMesh->mNumVertices; i++ )
   {
-    const aiVector3D* pPos = &( paiMesh->mVertices[i] );
-    const aiVector3D* pNormal = paiMesh->HasNormals ( ) ? &( paiMesh->mNormals[i] ) : &normal3D; 
-    const aiVector3D* pTexCoord = paiMesh->HasTextureCoords ( 0 ) ? &( paiMesh->mTextureCoords[0][i] ) : &zero3D;
+    // TODO:  Move the paiMesh`s checks
+    const aiVector3D* pPos      = &( paiMesh->mVertices[i] );
+    const aiVector3D* pNormal   = paiMesh->HasNormals ( )               ? &( paiMesh->mNormals[i] )           : &normal3D; 
+    const aiVector3D* pTexCoord = paiMesh->HasTextureCoords ( 0 )       ? &( paiMesh->mTextureCoords[0][i] )  : &zero3D;
+    const aiVector3D* pTangent  = paiMesh->HasTangentsAndBitangents ( ) ? &( paiMesh->mTangents[i] )          : &normal3D; // HACK: maybe without checks
 
     Vertex v (  Vector3f ( pPos->x, pPos->y, pPos->z ),
                 Vector2f ( pTexCoord->x, pTexCoord->y ),
-                Vector3f ( pNormal->x, pNormal->y, pNormal->z ) );
+                Vector3f ( pNormal->x, pNormal->y, pNormal->z ),
+                Vector3f ( pTangent->x, pTangent->y, pTangent->z ) 
+      );
 
     vertices.push_back ( v );
   }
@@ -122,9 +128,9 @@ void Mesh::InitMesh ( unsigned int index, const aiMesh* paiMesh )
   {
     const aiFace& Face = paiMesh->mFaces[i];
     
-	assert ( Face.mNumIndices == 3 );
+	  assert ( Face.mNumIndices == 3 );
     
-	indices.push_back ( Face.mIndices[0] );
+	  indices.push_back ( Face.mIndices[0] );
     indices.push_back ( Face.mIndices[1] );
     indices.push_back ( Face.mIndices[2] );
   }
@@ -151,7 +157,7 @@ bool Mesh::InitMaterials ( const aiScene* pScene, const std::string& filename )
     dir = filename.substr ( 0, slashIndex );
   }
 
-  bool ret = true;
+  bool returnResult = true;
 
   // Инициализируем материал
   for ( unsigned int i = 0; i< pScene->mNumMaterials; i++ )
@@ -174,7 +180,11 @@ bool Mesh::InitMaterials ( const aiScene* pScene, const std::string& filename )
           printf ( "Error loading texture '%s'\n", fullPath.c_str ( ) );
           delete m_textures[i];
           m_textures[i] = nullptr;
-          ret = false;
+          returnResult = false;
+        }
+        else 
+        {
+          printf ( "Loaded texture '%s'\n", fullPath.c_str ( ) );
         }
       }
     }
@@ -187,7 +197,7 @@ bool Mesh::InitMaterials ( const aiScene* pScene, const std::string& filename )
     }*/
   }
 
-  return ret;
+  return returnResult;
 }
 
 void Mesh::Render ( )
@@ -196,10 +206,12 @@ void Mesh::Render ( )
   glEnableVertexAttribArray ( VertexAtribLocation::POSITIONS      );
   glEnableVertexAttribArray ( VertexAtribLocation::TEXTURE_COORDS );
   glEnableVertexAttribArray ( VertexAtribLocation::NORMALS        );
+  glEnableVertexAttribArray ( VertexAtribLocation::TANGENTS       );
   /* Так как в шейдере у нас соответствующие атрибуты с их локациями
     layout ( location = 0 ) in vec3 position;	         
     layout ( location = 1 ) in vec2 texCoord;
-    layout ( location = 2 ) in vec3 normal;   */
+    layout ( location = 2 ) in vec3 normal;   
+    layout ( location = 2 ) in vec3 tangent;         */
 
   const int VERTEX_BYTE_SIZE = sizeof ( Vertex );
 
@@ -215,8 +227,9 @@ void Mesh::Render ( )
     // 5: число байтов между 2 атрибутами (одного типа)
     // 6: смещение в структуре (с какой позиции начинаются данные даного атрибута)
     glVertexAttribPointer ( VertexAtribLocation::POSITIONS,       3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE, 0 );
-    glVertexAttribPointer ( VertexAtribLocation::TEXTURE_COORDS,  3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE, ( const GLvoid* ) 12 );
+    glVertexAttribPointer ( VertexAtribLocation::TEXTURE_COORDS,  2, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE, ( const GLvoid* ) 12 );
     glVertexAttribPointer ( VertexAtribLocation::NORMALS,         3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE, ( const GLvoid* ) 20 );
+    glVertexAttribPointer ( VertexAtribLocation::TANGENTS,        3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE, ( const GLvoid* ) 32 );
 
     glBindBuffer ( GL_ELEMENT_ARRAY_BUFFER, entry.IB ); // делаем его активным как буфер индексов
 
@@ -224,14 +237,15 @@ void Mesh::Render ( )
 
     if ( MATERIAL_INDEX < m_textures.size ( ) && m_textures[MATERIAL_INDEX] )
     {
-      m_textures[MATERIAL_INDEX]->Bind ( GL_TEXTURE0 );
+      m_textures[MATERIAL_INDEX]->Bind ( COLOR_TEXTURE_UNIT );
     }
 
-    // рисуется как сообщение треугольников, по индексам, до максимума вершин по количеству
+    // Рисуется как сообщение треугольников, по индексам, до максимума вершин по количеству
     glDrawElements ( GL_TRIANGLES, entry.numIndices, GL_UNSIGNED_INT, 0 );
   }
 
   glDisableVertexAttribArray ( VertexAtribLocation::POSITIONS       );
   glDisableVertexAttribArray ( VertexAtribLocation::TEXTURE_COORDS  );
   glDisableVertexAttribArray ( VertexAtribLocation::NORMALS         );
+  glDisableVertexAttribArray ( VertexAtribLocation::TANGENTS        );
 }

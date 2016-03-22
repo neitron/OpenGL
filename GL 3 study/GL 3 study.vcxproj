@@ -30,6 +30,7 @@
     <ClInclude Include="callback.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="cubemap_texture.h" />
+    <ClInclude Include="engine_common.h" />
     <ClInclude Include="glut_backend.h" />
     <ClInclude Include="lighting_technique.h" />
     <ClInclude Include="main.h" />

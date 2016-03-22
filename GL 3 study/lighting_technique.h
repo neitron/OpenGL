@@ -85,14 +85,28 @@ public:
 
   // Матрица преобразования (world view projection)
   void SetWVP ( const Matrix4f& WVP );
+  // Матрица преобразования из позиции источника света (world view projection)
+  void SetLightWVP ( const Matrix4f& lightWVP );
   // Мировая матрица преобразования
   void SetWorldMatrix ( const Matrix4f& WorldInverse );
+
   // Указывает единицу текстуры в сэмплере
-  void SetTextureUnit ( unsigned int textureUnit ); 
+  void SetColorTextureUnit ( unsigned int textureUnit ); 
+  // Указывает единицу текстуры в сэмплере для карты теней
+  void SetNormalMapTextureUnit ( unsigned int textureUnit );
+  // Указывает единицу текстуры в сэмплере для карты теней
+  void SetShadowMapTextureUnit ( unsigned int textureUnit );
+  void SetUseNormalMap ( bool isUseNormalMap );
 
   // Направленное освещение:
   // Устанавливает направленное освещение
   void SetDirectionalLight ( const DirectionLight& light );
+  // Точечный свет:
+  // Устанавливает несколько источников света
+  void SetPointLights ( unsigned int numLights, const PointLight* pLights );
+  // Прожекторный свет:
+  // Устанавливает несколько источников света
+  void SetSpotLights ( unsigned int numLights, const SpotLight* pLights );
 
   // Отраженный свет:
   // Устанавливает в шейдере позицию зрителя
@@ -102,18 +116,8 @@ public:
   // Устанавливает в шейдере степень отражения материала
   void SetMatSpecularPower      ( float power );                  
 
-  // Точечный свет:
-  // Устанавливает несколько источников света
-  void SetPointLights ( unsigned int numLights, const PointLight* pLights );
-
-  // Прожекторный свет:
-  // Устанавливает несколько источников света
-  void SetSpotLights ( unsigned int numLights, const SpotLight* pLights );
   
-  // Матрица преобразования из позиции источника света (world view projection)
-  void SetLightWVP ( const Matrix4f& lightWVP );
-  // Указывает единицу текстуры в сэмплере для карты теней
-  void SetShadowMapTextureUnit ( unsigned int textureUnit );
+  
 
 private:
 
@@ -121,9 +125,9 @@ private:
   // 1 Матриц преобразований:
 
   GLuint m_WVPLocation;
-  GLuint m_WorldMatrixLocation;
+  GLuint m_worldMatrixLocation;
 
-  GLuint m_samplerLocation; // Ю-позиция семплера текстуры
+  GLuint m_colorMapLocation; // Ю-позиция семплера текстуры
                                
   // 2 Отраженного света:
 
@@ -182,8 +186,13 @@ private:
   GLuint m_numSpotLightsLocation; // Ю-позиция количество прожекторных источников света
 
   // 6 Для карты теней
-  GLuint m_LightWVPLocation;	// Ю-позиция мaрицы преобразования с позиции света
+  GLuint m_lightWVPLocation;	// Ю-позиция мaрицы преобразования с позиции света
   GLuint m_shadowMapLocation;	// Ю-позиция модуля текстуры для карты теней
+
+
+  // 7 Для карты нормалей
+  GLuint m_normalMapLocation;
+  GLuint m_isUseNormalMap;
 
 };
 

@@ -47,8 +47,8 @@ bool LightingTechnique::Init ( )
   }
 
   m_WVPLocation         = GetUniformLocation ( "gWVP" );
-  m_WorldMatrixLocation = GetUniformLocation ( "gWorld" );
-  m_samplerLocation     = GetUniformLocation ( "gSampler" );
+  m_worldMatrixLocation = GetUniformLocation ( "gWorld" );
+  m_colorMapLocation     = GetUniformLocation ( "gColorMap" );
 
   m_dirLightLocation.color            =   GetUniformLocation ( "gDirectionalLight.base.color" );
   m_dirLightLocation.ambientIntensity =   GetUniformLocation ( "gDirectionalLight.base.ambientIntensity" );
@@ -62,13 +62,16 @@ bool LightingTechnique::Init ( )
   m_numPointLightsLocation  =  GetUniformLocation ( "gNumPointLights" );
   m_numSpotLightsLocation   =  GetUniformLocation ( "gNumSpotLights" );
 
-  m_LightWVPLocation  = GetUniformLocation ( "gLightWVP" );
+  m_lightWVPLocation  = GetUniformLocation ( "gLightWVP" );
   m_shadowMapLocation = GetUniformLocation ( "gShadowMap" );
+
+  m_normalMapLocation = GetUniformLocation ( "gNormalMap" );
+  m_isUseNormalMap    = GetUniformLocation ( "gIsUseNormalMap" );
 
   if (
     m_WVPLocation                       == INVALID_UNIFORM_LOCATION ||
-    m_WorldMatrixLocation               == INVALID_UNIFORM_LOCATION ||
-    m_samplerLocation                   == INVALID_UNIFORM_LOCATION ||
+    m_worldMatrixLocation               == INVALID_UNIFORM_LOCATION ||
+    m_colorMapLocation                  == INVALID_UNIFORM_LOCATION ||
     m_dirLightLocation.ambientIntensity == INVALID_UNIFORM_LOCATION ||
     m_dirLightLocation.color            == INVALID_UNIFORM_LOCATION ||
     m_dirLightLocation.diffuseIntensity == INVALID_UNIFORM_LOCATION ||
@@ -78,8 +81,9 @@ bool LightingTechnique::Init ( )
     m_matSpecularPowerLocation          == INVALID_UNIFORM_LOCATION ||
     m_numPointLightsLocation            == INVALID_UNIFORM_LOCATION ||
     m_numSpotLightsLocation             == INVALID_UNIFORM_LOCATION ||
-    m_LightWVPLocation                  == INVALID_UNIFORM_LOCATION ||
-    m_shadowMapLocation                 == INVALID_UNIFORM_LOCATION
+    m_lightWVPLocation                  == INVALID_UNIFORM_LOCATION ||
+    m_shadowMapLocation                 == INVALID_UNIFORM_LOCATION ||
+    m_isUseNormalMap                    == INVALID_UNIFORM_LOCATION
     )
   {
     return false;
@@ -185,12 +189,17 @@ void LightingTechnique::SetWVP ( const Matrix4f& WVP )
 
 void LightingTechnique::SetWorldMatrix ( const Matrix4f& WorldInverse )
 {
-  glUniformMatrix4fv ( m_WorldMatrixLocation, 1, GL_TRUE, ( const GLfloat* ) WorldInverse.m );
+  glUniformMatrix4fv ( m_worldMatrixLocation, 1, GL_TRUE, ( const GLfloat* ) WorldInverse.m );
 }
 
-void LightingTechnique::SetTextureUnit ( unsigned int textureUnit )
+void LightingTechnique::SetColorTextureUnit ( unsigned int textureUnit )
 {
-  glUniform1i ( m_samplerLocation, textureUnit );
+  glUniform1i ( m_colorMapLocation, textureUnit );
+}
+
+void LightingTechnique::SetNormalMapTextureUnit ( unsigned int textureUnit )
+{
+  glUniform1i ( m_normalMapLocation, textureUnit );
 }
 
 void LightingTechnique::SetMatSpecularIntensity ( float intensity )
@@ -260,10 +269,15 @@ void LightingTechnique::SetSpotLights ( unsigned int numLights, const SpotLight*
 
 void LightingTechnique::SetLightWVP( const Matrix4f &lightWVP )
 {
-  glUniformMatrix4fv ( m_LightWVPLocation, 1, GL_TRUE, reinterpret_cast< const GLfloat* >( lightWVP.m ) );
+  glUniformMatrix4fv ( m_lightWVPLocation, 1, GL_TRUE, reinterpret_cast< const GLfloat* >( lightWVP.m ) );
 }
 
 void LightingTechnique::SetShadowMapTextureUnit( unsigned int textureUnit )
 {
   glUniform1i ( m_shadowMapLocation, textureUnit );
+}
+
+void LightingTechnique::SetUseNormalMap ( bool isUseNormalMap )
+{
+  glUniform1i ( m_isUseNormalMap, isUseNormalMap );
 }

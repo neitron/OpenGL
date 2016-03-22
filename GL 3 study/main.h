@@ -9,12 +9,12 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
 
-
+#include "engine_common.h"
+#include "utils.h"
+#include "glut_backend.h"
 #include "pipeline.h"
 #include "camera.h"
-#include "glut_backend.h"
 #include "lighting_technique.h"
-#include "utils.h"
 #include "mesh.h"
 #include "shadow_map_fbo.h"
 #include "shadow_map_technique.h"
@@ -40,9 +40,9 @@ public:
   virtual void RenderSceneCB ( );
 
   // Рендер данных глубины в карту теней
-  virtual void ShadowMapPass ( );
+  //virtual void ShadowMapPass ( );
 
-  virtual void RenderPass ( );
+  //virtual void RenderPass ( );
 
   virtual void IdleCB ( );
 
@@ -59,17 +59,18 @@ private:
   // main temp model
   Mesh*     m_pMesh;
   Texture*  m_pModelTex;
+  Texture*  m_pNormalMap;
 
   // ground model
   Mesh*     m_pQuad;
   Texture*  m_pGroundTex;
 
   LightingTechnique*  m_pLightingEffect;
-  //DirectionLight      m_directionalLight;
+  DirectionLight      m_directionalLight;
 
   ShadowMapFBO        m_shadowMapFBO;
 
-  SpotLight           m_spotLight;
+  //SpotLight           m_spotLight;
   ShadowMapTechnique* m_pShadowMapEffect;
 
   SkyBox* m_pSkyBox;
@@ -80,6 +81,8 @@ private:
   float m_specularIntensity;
 
   float m_scale;
+
+  bool m_isUseNormalMap;
 };
 
 

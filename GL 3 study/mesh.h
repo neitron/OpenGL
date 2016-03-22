@@ -3,21 +3,18 @@
 
 #pragma once
 
+#include <vector>
+#include <GL/glew.h>
+
+
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
 
-#include <vector>
-#include <GL/glew.h>
-
 #include "utils.h"
 #include "math3d.h"
 #include "texture.h"
-
-
-
-
 
 
 
@@ -26,15 +23,20 @@ struct Vertex
   Vector3f m_pos;
   Vector2f m_tex;
   Vector3f m_normal;
+  Vector3f m_tangent;
 
-  Vertex ( ) {}
+  Vertex ( ) {  }
 
-  Vertex ( const Vector3f& pos, const Vector2f& tex, const Vector3f& normal )
-  {
-    m_pos = pos;
-    m_tex = tex;
-    m_normal = normal;
-  }
+  Vertex (
+    const Vector3f& pos,
+    const Vector2f& tex,
+    const Vector3f& normal,
+    const Vector3f& tangent ) :
+    m_pos     ( pos ),
+    m_tex     ( tex ),
+    m_normal  ( normal ),
+    m_tangent ( tangent )
+  {  }
 };
 
 
@@ -82,7 +84,7 @@ private:
 
   enum VertexAtribLocation
   {
-    POSITIONS, TEXTURE_COORDS, NORMALS 
+    POSITIONS, TEXTURE_COORDS, NORMALS, TANGENTS
   };
 };
 

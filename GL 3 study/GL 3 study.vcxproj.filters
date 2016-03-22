@@ -188,6 +188,9 @@
     <ClInclude Include="skybox.h">
       <Filter>Заголовочные файлы\SkyBox</Filter>
     </ClInclude>
+    <ClInclude Include="engine_common.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="FS_Fail.glsl">

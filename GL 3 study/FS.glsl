@@ -1,11 +1,12 @@
 #version 330          
                 
-const int MAX_POINT_LIGHTS  = 3;
+const int MAX_POINT_LIGHTS  = 2;
 const int MAX_SPOT_LIGHTS   = 2;
 
 in vec2 texCoord0;
 in vec3 normal0;
 in vec3 worldPos0;
+in vec3 tangent0;
 
 in vec4 lightSpacePos;
 
@@ -60,13 +61,39 @@ uniform int					      gNumPointLights;
 
 uniform DirectionalLight	gDirectionalLight;
 
-uniform sampler2D			gSampler;
+uniform sampler2D			gColorMap;
 uniform sampler2D			gShadowMap;
+uniform sampler2D     gNormalMap;
 
 uniform vec3				gEyeWorldPos;
 uniform float				gMatSpecularIntensity;
 uniform float				gSpecularPower;
 
+uniform int   gIsUseNormalMap;
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Calc normal from normalMap to 
+vec3 CalcBumpedNormal ( )
+{
+  vec3 normal  = normalize ( normal0 );
+  if ( gIsUseNormalMap == 0 )
+  { 
+    return  normal; 
+  }
+                                   
+  vec3 tangent = normalize ( tangent0 );       
+
+  tangent = normalize ( tangent - dot ( tangent, normal ) * normal );                 
+  
+  vec3 bitangent = cross ( tangent, normal );                                         
+  vec3 bumpMapNormal = texture ( gNormalMap, texCoord0 ).xyz;
+  bumpMapNormal = 2.0 * bumpMapNormal - vec3(1.0, 1.0, 1.0);
+
+  mat3 tbn = mat3 ( tangent, bitangent, normal);
+           
+  return 
+    normalize ( tbn * bumpMapNormal );
+}
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -82,11 +109,10 @@ float CalcShadowFactor(vec4 lightSpacePos)
   // в тестурные (xMin = 0, xMax = 1)
 	UVCoords.x = 0.5 * projCoords.x + 0.5;
   UVCoords.y = 0.5 * projCoords.y + 0.5;
+  
+  float depth = texture ( gShadowMap, UVCoords ).x;
     
-	float z = 0.5 * projCoords.z + 0.5;
-  float depth = texture2D ( gShadowMap, UVCoords ).x;
-    
-	if ( depth < ( z + 0.00001 ) )
+	if ( depth <= ( projCoords.z + 0.005 ) )
 	{
     return 0.2;
 	}
@@ -181,8 +207,6 @@ vec4 CalcSpotLight ( SpotLight sLight, vec3 normal, vec4 lightSpacePos )
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void main ( void )
 {
-  vec3 normal = normalize ( normal0 );
-  
   // My simple magic :)))) ... ( иначе шейдер считает что этих переменных нет )
   gDirectionalLight.base.color;
   gDirectionalLight.base.ambientIntensity;
@@ -193,6 +217,8 @@ void main ( void )
   gPointLights[ 0 ].base.diffuseIntensity;
   // ...magic end
 
+  
+  vec3 normal = CalcBumpedNormal ( );
   vec4 totalLight = CalcDirectionalLight ( normal );
   
   for ( int i = 0; i < gNumPointLights; i++ ) 
@@ -205,6 +231,6 @@ void main ( void )
     totalLight += CalcSpotLight ( gSpotLights[ i ], normal, lightSpacePos );
   }
   
-  vec4 samplerColor = texture2D ( gSampler, texCoord0.xy );
+  vec4 samplerColor = texture2D ( gColorMap, texCoord0.xy );
   fragColor = samplerColor * totalLight;
 }
