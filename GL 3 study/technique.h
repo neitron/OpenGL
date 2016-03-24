@@ -23,6 +23,7 @@ protected:
 
   bool LoadShaderTextFile ( const char* pFilename, char* &pShaderText );
   bool AddShader ( GLenum shaderType, const char* pShaderText );
+  bool LoadShader ( GLenum shaderType, const char* pFilename );
   bool Finalize ( );
 
   GLint GetUniformLocation ( const char* pUniformName );

@@ -11,6 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="billboard_list.cpp" />
+    <ClCompile Include="billboard_technique.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="cubemap_texture.cpp" />
     <ClCompile Include="glut_backend.cpp" />
@@ -27,6 +29,8 @@
     <ClCompile Include="texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="billboard_list.h" />
+    <ClInclude Include="billboard_technique.h" />
     <ClInclude Include="callback.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="cubemap_texture.h" />
@@ -47,11 +51,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="FS.glsl" />
+    <None Include="FS_billboards.glsl" />
     <None Include="FS_Fail.glsl" />
     <None Include="FS_shadow_map.glsl" />
     <None Include="FS_skybox.glsl" />
+    <None Include="GS_billboards.glsl" />
     <None Include="temp.glsl" />
     <None Include="VS.glsl" />
+    <None Include="VS_billboards.glsl" />
     <None Include="VS_shadow_map.glsl" />
     <None Include="VS_skybox.glsl" />
   </ItemGroup>

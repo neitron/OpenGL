@@ -19,6 +19,7 @@
 #include "shadow_map_fbo.h"
 #include "shadow_map_technique.h"
 #include "skybox.h"
+#include "billboard_list.h"
 
 const int WINDOW_WIDTH = 1300;
 const int WINDOW_HEIGHT = 700;
@@ -76,6 +77,8 @@ private:
   SkyBox* m_pSkyBox;
 
   PersProjInfo m_persProjInfo;
+
+  BillboardList m_billboardList;
 
   float m_specularPower;
   float m_specularIntensity;

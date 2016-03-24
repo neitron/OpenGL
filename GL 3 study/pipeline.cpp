@@ -1,5 +1,19 @@
 #include "pipeline.h"
 
+const Matrix4f& Pipeline::GetVPTrans ( )
+{
+  Matrix4f cameraTranslationTrans;
+  Matrix4f cameraRotateTrans;
+  Matrix4f persProjTrans;
+
+  cameraTranslationTrans.InitTranslationTransform ( -m_camera.Pos.x, -m_camera.Pos.y, -m_camera.Pos.z );
+  cameraRotateTrans.InitCameraTransform ( m_camera.Target, m_camera.Up );
+  persProjTrans.InitPersProjTransform ( m_persProjInfo );
+  
+  m_VPTtransformation = persProjTrans * cameraRotateTrans * cameraTranslationTrans;
+  return m_VPTtransformation;
+}
+
 // Итоговая матрица трансформации
 const Matrix4f& Pipeline::GetWVPTrans()
 {

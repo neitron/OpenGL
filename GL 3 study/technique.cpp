@@ -115,6 +115,14 @@ bool Technique::AddShader ( GLenum shaderType, const char* pShaderText )
   return true;
 }
 
+bool Technique::LoadShader ( GLenum shaderType, const char * pFilename )
+{
+  char *pShaderText = 0;
+  return
+    LoadShaderTextFile ( pFilename, pShaderText ) &&
+    AddShader ( shaderType, pShaderText );
+}
+
 // Компиляция шейдеров
 bool Technique::Finalize ( )
 {

@@ -20,16 +20,12 @@ bool LightingTechnique::Init ( )
   bool  succes = true;
 
   char* pShaderText = nullptr;
-  
-  succes = 
-    LoadShaderTextFile ( "VS.glsl", pShaderText ) &&
-    AddShader ( GL_VERTEX_SHADER, pShaderText );
-
-  if ( !succes )
+  // TODO: refactore zone
+  if ( !LoadShader ( GL_VERTEX_SHADER, "VS.glsl" ) )
   {
     return false;
   }
-  
+
   succes = 
     LoadShaderTextFile ( "FS.glsl", pShaderText ) &&
     AddShader ( GL_FRAGMENT_SHADER, pShaderText );

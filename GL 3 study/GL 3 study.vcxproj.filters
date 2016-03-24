@@ -94,6 +94,9 @@
     <Filter Include="Файлы исходного кода\SkyBox\CubeMap">
       <UniqueIdentifier>{02347cfd-45ed-4d52-b7d0-9afdfd5d0257}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\Billboards">
+      <UniqueIdentifier>{12a7391f-effd-4259-aa9f-ad72c4f73e98}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -137,6 +140,12 @@
     </ClCompile>
     <ClCompile Include="skybox.cpp">
       <Filter>Файлы исходного кода\SkyBox</Filter>
+    </ClCompile>
+    <ClCompile Include="billboard_list.cpp">
+      <Filter>Файлы исходного кода</Filter>
+    </ClCompile>
+    <ClCompile Include="billboard_technique.cpp">
+      <Filter>Файлы исходного кода</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -191,6 +200,12 @@
     <ClInclude Include="engine_common.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
+    <ClInclude Include="billboard_list.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="billboard_technique.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="FS_Fail.glsl">
@@ -216,6 +231,15 @@
     </None>
     <None Include="FS_skybox.glsl">
       <Filter>Shaders\SkyBox</Filter>
+    </None>
+    <None Include="VS_billboards.glsl">
+      <Filter>Shaders\Billboards</Filter>
+    </None>
+    <None Include="GS_billboards.glsl">
+      <Filter>Shaders\Billboards</Filter>
+    </None>
+    <None Include="FS_billboards.glsl">
+      <Filter>Shaders\Billboards</Filter>
     </None>
   </ItemGroup>
 </Project>

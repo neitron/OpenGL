@@ -81,11 +81,6 @@ private:
 
   std::vector<MeshEntry>  m_entries;
   std::vector<Texture*>   m_textures;
-
-  enum VertexAtribLocation
-  {
-    POSITIONS, TEXTURE_COORDS, NORMALS, TANGENTS
-  };
 };
 
 

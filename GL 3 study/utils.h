@@ -29,5 +29,9 @@ void SafeDelete ( T& p )
   }
 }
 
+enum VertexAtribLocation
+{
+  POSITIONS, TEXTURE_COORDS, NORMALS, TANGENTS
+};
 
 #endif /* UTILS_H */

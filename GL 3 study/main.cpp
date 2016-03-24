@@ -44,7 +44,7 @@ Main::Main ( ) :
   m_specularIntensity ( 1.0f )
 {
   m_directionalLight.color            = Vector3f ( 1.0f );
-  m_directionalLight.ambientIntensity = 1.0f;
+  m_directionalLight.ambientIntensity = 0.7f;
   m_directionalLight.diffuseIntensity = 0.75f;
   m_directionalLight.direction        = Vector3f ( -1.0f, 0.0, -1.0 );
   
@@ -119,11 +119,9 @@ bool Main::Init ( )
   {
     return false;
   }
-
-  m_pNormalMap->Bind ( NORMAL_TEXTURE_UNIT );
   
   // Ground model
-  /*m_pQuad = new Mesh ( );
+  m_pQuad = new Mesh ( );
 
   if ( !m_pQuad->LoadMesh ( "Content/quad.obj" ) )
   {
@@ -135,7 +133,12 @@ bool Main::Init ( )
   if ( !m_pGroundTex->Load ( ) )
   {
     return false;
-  }*/
+  }
+
+  if ( !m_billboardList.Init ( "Content/target.png" ) ) // Content/monster_hellknight.png
+  {
+    return false;
+  }
 
 #pragma endregion
 
@@ -180,7 +183,7 @@ void Main::RenderSceneCB ( )
   p.SetCamera ( m_pGameCamera->GetPos ( ), m_pGameCamera->GetTarget ( ), m_pGameCamera->GetUp ( ) );
   p.SetPerspectiveProj ( m_persProjInfo );
 
-  m_pLightingEffect->SetUseNormalMap ( m_isUseNormalMap );
+  m_pLightingEffect->SetUseNormalMap ( false );
 
   m_pLightingEffect->SetWVP ( p.GetWVPTrans ( ) );
   m_pLightingEffect->SetWorldMatrix ( p.GetWorldTrans ( ) );
@@ -192,8 +195,10 @@ void Main::RenderSceneCB ( )
   m_pLightingEffect->SetMatSpecularPower     ( m_specularPower );
 
   // Çåìëÿ
-  //m_pGroundTex->Bind ( GL_TEXTURE0 );
-  //m_pQuad->Render ( );
+  m_pGroundTex->Bind ( COLOR_TEXTURE_UNIT );
+  m_pQuad->Render ( );
+
+  m_pLightingEffect->SetUseNormalMap ( m_isUseNormalMap );
 
   p.Scale     ( 0.1f, 0.1f, 0.1f );
   p.Rotate    ( 0.0f, m_scale, 0.0f );
@@ -202,8 +207,14 @@ void Main::RenderSceneCB ( )
   m_pLightingEffect->SetWorldMatrix ( p.GetWorldTrans ( ) );
 
   // Model
-  m_pModelTex->Bind ( GL_TEXTURE0 );
+  m_pModelTex->Bind ( COLOR_TEXTURE_UNIT );
+  m_pNormalMap->Bind ( NORMAL_TEXTURE_UNIT );
   m_pMesh->Render ( );
+
+  // billboards
+  p.Scale ( 10.0f, 10.0f, 10.0f );
+  p.WorldPos ( 0.0f, 0.0f, 0.0f );
+  m_billboardList.Render ( p.GetVPTrans ( ), m_pGameCamera->GetPos ( ) );
 
   m_pSkyBox->Render ( );
 

@@ -51,6 +51,8 @@ public:
       m_camera.Up     = Up;
     }
 
+    const Matrix4f & GetVPTrans ( );
+
     // Итоговая матрица трансформации
     const Matrix4f& GetWVPTrans ( );
     const Matrix4f& GetWorldTrans ( );
@@ -72,6 +74,7 @@ private:
 
     Matrix4f m_transformation;
     Matrix4f m_WorldTransformation;
+    Matrix4f m_VPTtransformation;
 };
 
 
